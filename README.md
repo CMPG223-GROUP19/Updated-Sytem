@@ -51,3 +51,30 @@ This project was originally developed as a **CMPG223 Group 19** project. The upd
 ## Repository
 
 [Updated Tawanda System](https://github.com/CMPG223-GROUP19/Updated-Sytem)
+
+
+## 📸 Screenshots
+
+### Login
+![Login](Screenshots/LOGIN1.PNG)
+
+### Child Management
+![Child Management](Screenshots/CHILDREN%20NEW%20RECORDS.PNG)
+
+### Adding Donations
+![Adding Donations](Screenshots/Add%20donations.PNG)
+
+### Updating Records
+![Updating Records](Screenshots/Update%20records.PNG)
+
+### Child Report
+![Child Report](Screenshots/Crepor.PNG)
+
+### Donation Report
+![Donation Report](Screenshots/Dreport.PNG)
+
+### User Management
+![User Management](Screenshots/USER%20MANAGEMENT.PNG)
+
+### Access Control
+![Access Control](Screenshots/Access%20control.PNG)
