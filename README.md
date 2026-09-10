@@ -53,28 +53,71 @@ This project was originally developed as a **CMPG223 Group 19** project. The upd
 [Updated Tawanda System](https://github.com/CMPG223-GROUP19/Updated-Sytem)
 
 
-## 📸 Screenshots
+## 📸 
+## System Screenshots
 
-### Login
-![Login](Screenshots/LOGIN1.PNG)
+### 1. Login Page
 
-### Child Management
-![Child Management](Screenshots/CHILDREN%20NEW%20RECORDS.PNG)
+The login page allows registered users to securely access the Tawanda System according to their assigned role.
 
-### Adding Donations
-![Adding Donations](Screenshots/Add%20donations.PNG)
+![Login Page](Screenshots/A.PNG)
 
-### Updating Records
-![Updating Records](Screenshots/Update%20records.PNG)
+### 2. Create Account
 
-### Child Report
-![Child Report](Screenshots/Crepor.PNG)
+The administrator can create a new user account. A confirmation message is displayed after the new user has been successfully registered.
 
-### Donation Report
-![Donation Report](Screenshots/Dreport.PNG)
+![Create Account](Screenshots/B.PNG)
 
-### User Management
-![User Management](Screenshots/USER%20MANAGEMENT.PNG)
+### 3. User Management
 
-### Access Control
-![Access Control](Screenshots/Access%20control.PNG)
+The administrator can access the User Management page to view and manage registered system users.
+
+![User Management](Screenshots/C.PNG)
+
+### 4. Update User Role and Account Status
+
+The administrator can update a user's details, assign a role such as Manager, and activate the user's account.
+
+![Update User Role and Account Status](Screenshots/D.PNG)
+
+### 5. Administrator Access Management
+
+When an Administrator logs in, the Access Management page provides access to all available sections of the Tawanda System, including User Management.
+
+![Administrator Access Management](Screenshots/E.PNG)
+
+### 6. Manager Access Management
+
+When a Manager logs in, the Access Management page displays only the sections available to the Manager. The User Management section is restricted to Administrators.
+
+![Manager Access Management](Screenshots/F.PNG)
+
+### 7. Add Child Record
+
+A new child can be added to the Tawanda System and the child's information is recorded in the system.
+
+![Add Child Record](Screenshots/G.PNG)
+
+### 8. Update Child Record
+
+Selecting a child from the DataGridView automatically populates the relevant fields. The user can then update the child's information, including recording when the child has departed from Tawanda Home.
+
+![Update Child Record](Screenshots/H.PNG)
+
+### 9. Record Donation
+
+The Donations page allows users to record a new donation received by Tawanda Home.
+
+![Record Donation](Screenshots/I.PNG)
+
+### 10. Children Report
+
+The Children Report provides an overview of children recorded in the system. Users can filter the report to view All Children, Accepted Children, Not Accepted Children, or Departed Children.
+
+![Children Report](Screenshots/J.PNG)
+
+### 11. Donations Report
+
+The Donations Report provides a visual summary of donation records stored in the system.
+
+![Donations Report](Screenshots/K.PNG)
