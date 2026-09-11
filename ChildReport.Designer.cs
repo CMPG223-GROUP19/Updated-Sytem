@@ -29,174 +29,58 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
-            this.btnApply = new System.Windows.Forms.Button();
-            this.btnBack = new System.Windows.Forms.Button();
-            this.lblHeading = new System.Windows.Forms.Label();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.lblRecords = new System.Windows.Forms.Label();
-            this.dgvChildReport = new System.Windows.Forms.DataGridView();
-            this.rdoA = new System.Windows.Forms.RadioButton();
-            this.rdoD = new System.Windows.Forms.RadioButton();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBoxIsAccepted = new System.Windows.Forms.GroupBox();
-            this.rdbDepartedChildren = new System.Windows.Forms.RadioButton();
-            this.rdbNotAcceptedChildren = new System.Windows.Forms.RadioButton();
-            this.rdbAcceptedChildren = new System.Windows.Forms.RadioButton();
             this.rdbAllChildren = new System.Windows.Forms.RadioButton();
-            this.cmbSortBy = new System.Windows.Forms.ComboBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.lblRecordCount = new System.Windows.Forms.Label();
+            this.rdbAcceptedChildren = new System.Windows.Forms.RadioButton();
+            this.rdbNotAcceptedChildren = new System.Windows.Forms.RadioButton();
+            this.rdbDepartedChildren = new System.Windows.Forms.RadioButton();
+            this.lblReportTitle = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.lblLoggedInRole = new System.Windows.Forms.Label();
+            this.lblLoggedInUser = new System.Windows.Forms.Label();
+            this.lblHeading = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.grpRecords = new System.Windows.Forms.GroupBox();
+            this.dgvChildReport = new System.Windows.Forms.DataGridView();
+            this.btnGenerate = new System.Windows.Forms.Button();
+            this.grpStatistics = new System.Windows.Forms.GroupBox();
+            this.chartChildrenStatus = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.grpFilter = new System.Windows.Forms.GroupBox();
+            this.dateTimePickerTo = new System.Windows.Forms.DateTimePicker();
+            this.lblTo = new System.Windows.Forms.Label();
+            this.lblFrom = new System.Windows.Forms.Label();
+            this.dateTimePickerFrom = new System.Windows.Forms.DateTimePicker();
+            this.lblReportDescription = new System.Windows.Forms.Label();
+            this.lblDTB = new System.Windows.Forms.Label();
+            this.btnBck = new System.Windows.Forms.Button();
+            this.panel2.SuspendLayout();
+            this.panel1.SuspendLayout();
+            this.grpRecords.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvChildReport)).BeginInit();
-            this.groupBox1.SuspendLayout();
-            this.groupBoxIsAccepted.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            this.grpStatistics.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chartChildrenStatus)).BeginInit();
+            this.grpFilter.SuspendLayout();
             this.SuspendLayout();
             // 
-            // checkedListBox1
+            // rdbAllChildren
             // 
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Location = new System.Drawing.Point(26, 0);
-            this.checkedListBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(14, 4);
-            this.checkedListBox1.TabIndex = 1;
-            // 
-            // btnApply
-            // 
-            this.btnApply.BackColor = System.Drawing.Color.SkyBlue;
-            this.btnApply.Location = new System.Drawing.Point(26, 670);
-            this.btnApply.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.btnApply.Name = "btnApply";
-            this.btnApply.Size = new System.Drawing.Size(416, 77);
-            this.btnApply.TabIndex = 7;
-            this.btnApply.Text = "&Apply";
-            this.btnApply.UseVisualStyleBackColor = false;
-            this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
-            // 
-            // btnBack
-            // 
-            this.btnBack.BackColor = System.Drawing.Color.SkyBlue;
-            this.btnBack.Location = new System.Drawing.Point(766, 670);
-            this.btnBack.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.btnBack.Name = "btnBack";
-            this.btnBack.Size = new System.Drawing.Size(375, 77);
-            this.btnBack.TabIndex = 8;
-            this.btnBack.Text = "&Back";
-            this.btnBack.UseVisualStyleBackColor = false;
-            this.btnBack.Click += new System.EventHandler(this.btnBack_Click);
-            // 
-            // lblHeading
-            // 
-            this.lblHeading.AutoSize = true;
-            this.lblHeading.Font = new System.Drawing.Font("Mongolian Baiti", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblHeading.Location = new System.Drawing.Point(343, 9);
-            this.lblHeading.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblHeading.Name = "lblHeading";
-            this.lblHeading.Size = new System.Drawing.Size(376, 40);
-            this.lblHeading.TabIndex = 10;
-            this.lblHeading.Text = "CHILDREN REPORT";
-            // 
-            // lblRecords
-            // 
-            this.lblRecords.AutoSize = true;
-            this.lblRecords.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblRecords.Location = new System.Drawing.Point(387, 381);
-            this.lblRecords.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblRecords.Name = "lblRecords";
-            this.lblRecords.Size = new System.Drawing.Size(259, 29);
-            this.lblRecords.TabIndex = 33;
-            this.lblRecords.Text = "CHILDREN RECORDS";
-            // 
-            // dgvChildReport
-            // 
-            this.dgvChildReport.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvChildReport.Location = new System.Drawing.Point(26, 425);
-            this.dgvChildReport.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.dgvChildReport.Name = "dgvChildReport";
-            this.dgvChildReport.RowHeadersWidth = 51;
-            this.dgvChildReport.RowTemplate.Height = 24;
-            this.dgvChildReport.Size = new System.Drawing.Size(1115, 194);
-            this.dgvChildReport.TabIndex = 2;
-            // 
-            // rdoA
-            // 
-            this.rdoA.AutoSize = true;
-            this.rdoA.Location = new System.Drawing.Point(9, 53);
-            this.rdoA.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.rdoA.Name = "rdoA";
-            this.rdoA.Size = new System.Drawing.Size(144, 29);
-            this.rdoA.TabIndex = 0;
-            this.rdoA.TabStop = true;
-            this.rdoA.Text = "Ascending";
-            this.rdoA.UseVisualStyleBackColor = true;
-            // 
-            // rdoD
-            // 
-            this.rdoD.AutoSize = true;
-            this.rdoD.Location = new System.Drawing.Point(9, 92);
-            this.rdoD.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.rdoD.Name = "rdoD";
-            this.rdoD.Size = new System.Drawing.Size(157, 29);
-            this.rdoD.TabIndex = 1;
-            this.rdoD.TabStop = true;
-            this.rdoD.Text = "Descending";
-            this.rdoD.UseVisualStyleBackColor = true;
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.rdoD);
-            this.groupBox1.Controls.Add(this.rdoA);
-            this.groupBox1.Location = new System.Drawing.Point(572, 64);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox1.Size = new System.Drawing.Size(552, 144);
-            this.groupBox1.TabIndex = 4;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Sort Order";
-            // 
-            // groupBoxIsAccepted
-            // 
-            this.groupBoxIsAccepted.Controls.Add(this.rdbDepartedChildren);
-            this.groupBoxIsAccepted.Controls.Add(this.rdbNotAcceptedChildren);
-            this.groupBoxIsAccepted.Controls.Add(this.rdbAcceptedChildren);
-            this.groupBoxIsAccepted.Controls.Add(this.rdbAllChildren);
-            this.groupBoxIsAccepted.Location = new System.Drawing.Point(26, 218);
-            this.groupBoxIsAccepted.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBoxIsAccepted.Name = "groupBoxIsAccepted";
-            this.groupBoxIsAccepted.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBoxIsAccepted.Size = new System.Drawing.Size(1098, 134);
-            this.groupBoxIsAccepted.TabIndex = 2;
-            this.groupBoxIsAccepted.TabStop = false;
-            this.groupBoxIsAccepted.Text = "Child Status";
-            // 
-            // rdbDepartedChildren
-            // 
-            this.rdbDepartedChildren.AutoSize = true;
-            this.rdbDepartedChildren.Location = new System.Drawing.Point(546, 90);
-            this.rdbDepartedChildren.Name = "rdbDepartedChildren";
-            this.rdbDepartedChildren.Size = new System.Drawing.Size(217, 29);
-            this.rdbDepartedChildren.TabIndex = 3;
-            this.rdbDepartedChildren.TabStop = true;
-            this.rdbDepartedChildren.Text = "Departed Children";
-            this.rdbDepartedChildren.UseVisualStyleBackColor = true;
-            // 
-            // rdbNotAcceptedChildren
-            // 
-            this.rdbNotAcceptedChildren.AutoSize = true;
-            this.rdbNotAcceptedChildren.Location = new System.Drawing.Point(546, 32);
-            this.rdbNotAcceptedChildren.Name = "rdbNotAcceptedChildren";
-            this.rdbNotAcceptedChildren.Size = new System.Drawing.Size(258, 29);
-            this.rdbNotAcceptedChildren.TabIndex = 2;
-            this.rdbNotAcceptedChildren.TabStop = true;
-            this.rdbNotAcceptedChildren.Text = "Not Accepted Children";
-            this.rdbNotAcceptedChildren.UseVisualStyleBackColor = true;
+            this.rdbAllChildren.AutoSize = true;
+            this.rdbAllChildren.Location = new System.Drawing.Point(6, 30);
+            this.rdbAllChildren.Name = "rdbAllChildren";
+            this.rdbAllChildren.Size = new System.Drawing.Size(159, 29);
+            this.rdbAllChildren.TabIndex = 0;
+            this.rdbAllChildren.TabStop = true;
+            this.rdbAllChildren.Text = "All Children ";
+            this.rdbAllChildren.UseVisualStyleBackColor = true;
             // 
             // rdbAcceptedChildren
             // 
             this.rdbAcceptedChildren.AutoSize = true;
-            this.rdbAcceptedChildren.Location = new System.Drawing.Point(32, 90);
+            this.rdbAcceptedChildren.Location = new System.Drawing.Point(302, 30);
             this.rdbAcceptedChildren.Name = "rdbAcceptedChildren";
             this.rdbAcceptedChildren.Size = new System.Drawing.Size(219, 29);
             this.rdbAcceptedChildren.TabIndex = 1;
@@ -204,97 +88,299 @@
             this.rdbAcceptedChildren.Text = "Accepted Children";
             this.rdbAcceptedChildren.UseVisualStyleBackColor = true;
             // 
-            // rdbAllChildren
+            // rdbNotAcceptedChildren
             // 
-            this.rdbAllChildren.AutoSize = true;
-            this.rdbAllChildren.Location = new System.Drawing.Point(32, 32);
-            this.rdbAllChildren.Name = "rdbAllChildren";
-            this.rdbAllChildren.Size = new System.Drawing.Size(165, 29);
-            this.rdbAllChildren.TabIndex = 0;
-            this.rdbAllChildren.TabStop = true;
-            this.rdbAllChildren.Text = "All Children  ";
-            this.rdbAllChildren.UseVisualStyleBackColor = true;
+            this.rdbNotAcceptedChildren.AutoSize = true;
+            this.rdbNotAcceptedChildren.Location = new System.Drawing.Point(643, 30);
+            this.rdbNotAcceptedChildren.Name = "rdbNotAcceptedChildren";
+            this.rdbNotAcceptedChildren.Size = new System.Drawing.Size(258, 29);
+            this.rdbNotAcceptedChildren.TabIndex = 2;
+            this.rdbNotAcceptedChildren.TabStop = true;
+            this.rdbNotAcceptedChildren.Text = "Not Accepted Children";
+            this.rdbNotAcceptedChildren.UseVisualStyleBackColor = true;
             // 
-            // cmbSortBy
+            // rdbDepartedChildren
             // 
-            this.cmbSortBy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbSortBy.FormattingEnabled = true;
-            this.cmbSortBy.Items.AddRange(new object[] {
-            "Child Name",
-            "Arrival Date",
-            "Child ID"});
-            this.cmbSortBy.Location = new System.Drawing.Point(32, 89);
-            this.cmbSortBy.Name = "cmbSortBy";
-            this.cmbSortBy.Size = new System.Drawing.Size(369, 33);
-            this.cmbSortBy.TabIndex = 34;
+            this.rdbDepartedChildren.AutoSize = true;
+            this.rdbDepartedChildren.Location = new System.Drawing.Point(984, 30);
+            this.rdbDepartedChildren.Name = "rdbDepartedChildren";
+            this.rdbDepartedChildren.Size = new System.Drawing.Size(217, 29);
+            this.rdbDepartedChildren.TabIndex = 3;
+            this.rdbDepartedChildren.TabStop = true;
+            this.rdbDepartedChildren.Text = "Departed Children";
+            this.rdbDepartedChildren.UseVisualStyleBackColor = true;
             // 
-            // groupBox2
+            // lblReportTitle
             // 
-            this.groupBox2.Controls.Add(this.cmbSortBy);
-            this.groupBox2.Location = new System.Drawing.Point(26, 52);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(539, 156);
-            this.groupBox2.TabIndex = 35;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Sort Records By:";
+            this.lblReportTitle.AutoSize = true;
+            this.lblReportTitle.Font = new System.Drawing.Font("Segoe UI", 16.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblReportTitle.Location = new System.Drawing.Point(362, 0);
+            this.lblReportTitle.Name = "lblReportTitle";
+            this.lblReportTitle.Size = new System.Drawing.Size(412, 59);
+            this.lblReportTitle.TabIndex = 4;
+            this.lblReportTitle.Text = "CHILDREN REPORT";
             // 
-            // lblRecordCount
+            // panel2
             // 
-            this.lblRecordCount.AutoSize = true;
-            this.lblRecordCount.Location = new System.Drawing.Point(21, 624);
-            this.lblRecordCount.Name = "lblRecordCount";
-            this.lblRecordCount.Size = new System.Drawing.Size(165, 25);
-            this.lblRecordCount.TabIndex = 36;
-            this.lblRecordCount.Text = "Records Found:";
+            this.panel2.BackColor = System.Drawing.Color.LightGray;
+            this.panel2.Controls.Add(this.lblLoggedInRole);
+            this.panel2.Controls.Add(this.lblLoggedInUser);
+            this.panel2.Controls.Add(this.lblHeading);
+            this.panel2.Controls.Add(this.label3);
+            this.panel2.ForeColor = System.Drawing.Color.Black;
+            this.panel2.Location = new System.Drawing.Point(1, 1);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(1233, 115);
+            this.panel2.TabIndex = 15;
+            // 
+            // lblLoggedInRole
+            // 
+            this.lblLoggedInRole.AutoSize = true;
+            this.lblLoggedInRole.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLoggedInRole.Location = new System.Drawing.Point(905, 73);
+            this.lblLoggedInRole.Name = "lblLoggedInRole";
+            this.lblLoggedInRole.Size = new System.Drawing.Size(119, 32);
+            this.lblLoggedInRole.TabIndex = 15;
+            this.lblLoggedInRole.Text = "Role: User";
+            // 
+            // lblLoggedInUser
+            // 
+            this.lblLoggedInUser.AutoSize = true;
+            this.lblLoggedInUser.Font = new System.Drawing.Font("Segoe UI", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLoggedInUser.Location = new System.Drawing.Point(869, 9);
+            this.lblLoggedInUser.Name = "lblLoggedInUser";
+            this.lblLoggedInUser.Size = new System.Drawing.Size(208, 37);
+            this.lblLoggedInUser.TabIndex = 14;
+            this.lblLoggedInUser.Text = "Welcome, User";
+            // 
+            // lblHeading
+            // 
+            this.lblHeading.AutoSize = true;
+            this.lblHeading.BackColor = System.Drawing.Color.LightGray;
+            this.lblHeading.Font = new System.Drawing.Font("Segoe UI", 22.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblHeading.ForeColor = System.Drawing.Color.Black;
+            this.lblHeading.Location = new System.Drawing.Point(12, 9);
+            this.lblHeading.Name = "lblHeading";
+            this.lblHeading.Size = new System.Drawing.Size(571, 78);
+            this.lblHeading.TabIndex = 12;
+            this.lblHeading.Text = "TAWANDA SYSTEM";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(32, 73);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(459, 37);
+            this.label3.TabIndex = 13;
+            this.label3.Text = "Child & Donation Management System";
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.grpRecords);
+            this.panel1.Controls.Add(this.btnGenerate);
+            this.panel1.Controls.Add(this.grpStatistics);
+            this.panel1.Controls.Add(this.grpFilter);
+            this.panel1.Controls.Add(this.lblReportDescription);
+            this.panel1.Controls.Add(this.lblReportTitle);
+            this.panel1.Location = new System.Drawing.Point(1, 119);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1236, 662);
+            this.panel1.TabIndex = 16;
+            // 
+            // grpRecords
+            // 
+            this.grpRecords.Controls.Add(this.dgvChildReport);
+            this.grpRecords.Location = new System.Drawing.Point(574, 239);
+            this.grpRecords.Name = "grpRecords";
+            this.grpRecords.Size = new System.Drawing.Size(630, 334);
+            this.grpRecords.TabIndex = 17;
+            this.grpRecords.TabStop = false;
+            this.grpRecords.Text = "DETAILED RECORDS";
+            // 
+            // dgvChildReport
+            // 
+            this.dgvChildReport.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvChildReport.Location = new System.Drawing.Point(6, 30);
+            this.dgvChildReport.Name = "dgvChildReport";
+            this.dgvChildReport.RowHeadersWidth = 82;
+            this.dgvChildReport.RowTemplate.Height = 33;
+            this.dgvChildReport.Size = new System.Drawing.Size(624, 297);
+            this.dgvChildReport.TabIndex = 0;
+            // 
+            // btnGenerate
+            // 
+            this.btnGenerate.BackColor = System.Drawing.Color.SkyBlue;
+            this.btnGenerate.Font = new System.Drawing.Font("Segoe UI", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnGenerate.Location = new System.Drawing.Point(9, 579);
+            this.btnGenerate.Name = "btnGenerate";
+            this.btnGenerate.Size = new System.Drawing.Size(1195, 70);
+            this.btnGenerate.TabIndex = 26;
+            this.btnGenerate.Text = "GENERATE REPORT";
+            this.btnGenerate.UseVisualStyleBackColor = false;
+            this.btnGenerate.Click += new System.EventHandler(this.btnGenerate_Click);
+            // 
+            // grpStatistics
+            // 
+            this.grpStatistics.Controls.Add(this.chartChildrenStatus);
+            this.grpStatistics.Location = new System.Drawing.Point(3, 239);
+            this.grpStatistics.Name = "grpStatistics";
+            this.grpStatistics.Size = new System.Drawing.Size(565, 334);
+            this.grpStatistics.TabIndex = 25;
+            this.grpStatistics.TabStop = false;
+            this.grpStatistics.Text = "CHILD STATISTICS";
+            // 
+            // chartChildrenStatus
+            // 
+            chartArea2.Name = "ChartArea1";
+            this.chartChildrenStatus.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chartChildrenStatus.Legends.Add(legend2);
+            this.chartChildrenStatus.Location = new System.Drawing.Point(11, 30);
+            this.chartChildrenStatus.Name = "chartChildrenStatus";
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chartChildrenStatus.Series.Add(series2);
+            this.chartChildrenStatus.Size = new System.Drawing.Size(543, 297);
+            this.chartChildrenStatus.TabIndex = 0;
+            this.chartChildrenStatus.Text = "chart1";
+            // 
+            // grpFilter
+            // 
+            this.grpFilter.Controls.Add(this.dateTimePickerTo);
+            this.grpFilter.Controls.Add(this.lblTo);
+            this.grpFilter.Controls.Add(this.rdbAllChildren);
+            this.grpFilter.Controls.Add(this.lblFrom);
+            this.grpFilter.Controls.Add(this.dateTimePickerFrom);
+            this.grpFilter.Controls.Add(this.rdbAcceptedChildren);
+            this.grpFilter.Controls.Add(this.rdbNotAcceptedChildren);
+            this.grpFilter.Controls.Add(this.rdbDepartedChildren);
+            this.grpFilter.Location = new System.Drawing.Point(3, 90);
+            this.grpFilter.Name = "grpFilter";
+            this.grpFilter.Size = new System.Drawing.Size(1217, 143);
+            this.grpFilter.TabIndex = 21;
+            this.grpFilter.TabStop = false;
+            this.grpFilter.Text = "FILTERS";
+            // 
+            // dateTimePickerTo
+            // 
+            this.dateTimePickerTo.Location = new System.Drawing.Point(738, 82);
+            this.dateTimePickerTo.Name = "dateTimePickerTo";
+            this.dateTimePickerTo.Size = new System.Drawing.Size(200, 31);
+            this.dateTimePickerTo.TabIndex = 22;
+            // 
+            // lblTo
+            // 
+            this.lblTo.AutoSize = true;
+            this.lblTo.Location = new System.Drawing.Point(683, 88);
+            this.lblTo.Name = "lblTo";
+            this.lblTo.Size = new System.Drawing.Size(49, 25);
+            this.lblTo.TabIndex = 24;
+            this.lblTo.Text = "To :";
+            // 
+            // lblFrom
+            // 
+            this.lblFrom.AutoSize = true;
+            this.lblFrom.Location = new System.Drawing.Point(6, 88);
+            this.lblFrom.Name = "lblFrom";
+            this.lblFrom.Size = new System.Drawing.Size(73, 25);
+            this.lblFrom.TabIndex = 23;
+            this.lblFrom.Text = "From :";
+            // 
+            // dateTimePickerFrom
+            // 
+            this.dateTimePickerFrom.Location = new System.Drawing.Point(110, 88);
+            this.dateTimePickerFrom.Name = "dateTimePickerFrom";
+            this.dateTimePickerFrom.Size = new System.Drawing.Size(200, 31);
+            this.dateTimePickerFrom.TabIndex = 4;
+            // 
+            // lblReportDescription
+            // 
+            this.lblReportDescription.AutoSize = true;
+            this.lblReportDescription.Font = new System.Drawing.Font("Segoe UI", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblReportDescription.Location = new System.Drawing.Point(383, 59);
+            this.lblReportDescription.Name = "lblReportDescription";
+            this.lblReportDescription.Size = new System.Drawing.Size(380, 37);
+            this.lblReportDescription.TabIndex = 20;
+            this.lblReportDescription.Text = "View and analyse child records";
+            // 
+            // lblDTB
+            // 
+            this.lblDTB.AutoSize = true;
+            this.lblDTB.Location = new System.Drawing.Point(21, 819);
+            this.lblDTB.Name = "lblDTB";
+            this.lblDTB.Size = new System.Drawing.Size(233, 25);
+            this.lblDTB.TabIndex = 27;
+            this.lblDTB.Text = "● Database Connected";
+            // 
+            // btnBck
+            // 
+            this.btnBck.BackColor = System.Drawing.Color.SkyBlue;
+            this.btnBck.Font = new System.Drawing.Font("Segoe UI", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBck.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnBck.Location = new System.Drawing.Point(730, 798);
+            this.btnBck.Name = "btnBck";
+            this.btnBck.Size = new System.Drawing.Size(475, 82);
+            this.btnBck.TabIndex = 28;
+            this.btnBck.Text = "BACK";
+            this.btnBck.UseVisualStyleBackColor = false;
+            this.btnBck.Click += new System.EventHandler(this.btnBck_Click);
             // 
             // ChildReport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1200, 752);
-            this.Controls.Add(this.lblRecordCount);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.lblRecords);
-            this.Controls.Add(this.lblHeading);
-            this.Controls.Add(this.btnBack);
-            this.Controls.Add(this.btnApply);
-            this.Controls.Add(this.groupBoxIsAccepted);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.dgvChildReport);
-            this.Controls.Add(this.checkedListBox1);
+            this.BackColor = System.Drawing.Color.LightGray;
+            this.ClientSize = new System.Drawing.Size(1233, 898);
+            this.Controls.Add(this.btnBck);
+            this.Controls.Add(this.lblDTB);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.panel2);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "ChildReport";
-            this.Text = "ChildReport";
+            this.Text = "Tawanda System - Children Report";
             this.Load += new System.EventHandler(this.ChildReport_Load);
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.grpRecords.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvChildReport)).EndInit();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBoxIsAccepted.ResumeLayout(false);
-            this.groupBoxIsAccepted.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
+            this.grpStatistics.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chartChildrenStatus)).EndInit();
+            this.grpFilter.ResumeLayout(false);
+            this.grpFilter.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.CheckedListBox checkedListBox1;
-        private System.Windows.Forms.Button btnApply;
-        private System.Windows.Forms.Button btnBack;
-        private System.Windows.Forms.Label lblHeading;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.Label lblRecords;
-        private System.Windows.Forms.DataGridView dgvChildReport;
-        private System.Windows.Forms.RadioButton rdoA;
-        private System.Windows.Forms.RadioButton rdoD;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.GroupBox groupBoxIsAccepted;
-        private System.Windows.Forms.ComboBox cmbSortBy;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Label lblRecordCount;
-        private System.Windows.Forms.RadioButton rdbDepartedChildren;
-        private System.Windows.Forms.RadioButton rdbNotAcceptedChildren;
-        private System.Windows.Forms.RadioButton rdbAcceptedChildren;
         private System.Windows.Forms.RadioButton rdbAllChildren;
+        private System.Windows.Forms.RadioButton rdbAcceptedChildren;
+        private System.Windows.Forms.RadioButton rdbNotAcceptedChildren;
+        private System.Windows.Forms.RadioButton rdbDepartedChildren;
+        private System.Windows.Forms.Label lblReportTitle;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Label lblLoggedInRole;
+        private System.Windows.Forms.Label lblLoggedInUser;
+        private System.Windows.Forms.Label lblHeading;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label lblReportDescription;
+        private System.Windows.Forms.GroupBox grpFilter;
+        private System.Windows.Forms.Label lblTo;
+        private System.Windows.Forms.Label lblFrom;
+        private System.Windows.Forms.DateTimePicker dateTimePickerTo;
+        private System.Windows.Forms.DateTimePicker dateTimePickerFrom;
+        private System.Windows.Forms.GroupBox grpStatistics;
+        private System.Windows.Forms.DataGridView dgvChildReport;
+        private System.Windows.Forms.Button btnGenerate;
+        private System.Windows.Forms.GroupBox grpRecords;
+        private System.Windows.Forms.Label lblDTB;
+        private System.Windows.Forms.Button btnBck;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartChildrenStatus;
     }
 }

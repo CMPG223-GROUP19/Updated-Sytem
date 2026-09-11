@@ -1,28 +1,26 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace TawandaSystem
 {
     public partial class ChildReport : Form
     {
         // ============================================================
-        // LOGIN INFORMATION
+        // USER INFORMATION
         // ============================================================
 
-        private string loggedInUsername;
-        private string loggedInRole;
-
+        private readonly string loggedInUsername;
+        private readonly string loggedInRole;
 
         // ============================================================
         // DATABASE CONNECTION
         // ============================================================
 
         private readonly string connectionString =
-            @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TAWANDA;Integrated Security=True;";
-
+            @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TAWANDA;Integrated Security=True";
 
         // ============================================================
         // CONSTRUCTOR
@@ -36,431 +34,17 @@ namespace TawandaSystem
             loggedInRole = role;
         }
 
-
         // ============================================================
-        // STYLE DATAGRIDVIEW
+        // DEFAULT CONSTRUCTOR
         // ============================================================
 
-        private void StyleChildReportGrid()
+        public ChildReport()
         {
-            dgvChildReport.AutoSizeColumnsMode =
-                DataGridViewAutoSizeColumnsMode.Fill;
+            InitializeComponent();
 
-            dgvChildReport.AutoSizeRowsMode =
-                DataGridViewAutoSizeRowsMode.None;
-
-            dgvChildReport.AllowUserToAddRows = false;
-            dgvChildReport.AllowUserToDeleteRows = false;
-            dgvChildReport.AllowUserToResizeRows = false;
-
-            dgvChildReport.ReadOnly = true;
-
-            dgvChildReport.MultiSelect = false;
-
-            dgvChildReport.SelectionMode =
-                DataGridViewSelectionMode.FullRowSelect;
-
-            dgvChildReport.RowHeadersVisible = false;
-
-            dgvChildReport.ColumnHeadersDefaultCellStyle.Font =
-                new Font(
-                    dgvChildReport.Font,
-                    FontStyle.Bold);
-
-            dgvChildReport.ColumnHeadersHeight = 35;
-
-            dgvChildReport.AlternatingRowsDefaultCellStyle.BackColor =
-                SystemColors.ControlLight;
-
-            dgvChildReport.GridColor =
-                SystemColors.ControlDark;
+            loggedInUsername = "";
+            loggedInRole = "";
         }
-
-
-        // ============================================================
-        // APPLY BUTTON
-        // ============================================================
-
-        private void btnApply_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                using (SqlConnection conn =
-                    new SqlConnection(connectionString))
-                {
-                    conn.Open();
-
-                    // ------------------------------------------------
-                    // BASE QUERY
-                    // ------------------------------------------------
-
-                    string query = @"
-                        SELECT
-                            Child_ID,
-                            Child_FName,
-                            Child_LName,
-                            ID_Number,
-                            Arrival_Date,
-                            Accepted_YN,
-                            Departure_Date
-                        FROM Child_tbl";
-
-
-                    // ------------------------------------------------
-                    // CHILD STATUS FILTER
-                    // ------------------------------------------------
-
-                    if (rdbAcceptedChildren.Checked)
-                    {
-                        query +=
-                            " WHERE Accepted_YN = 1";
-                    }
-                    else if (rdbNotAcceptedChildren.Checked)
-                    {
-                        query +=
-                            " WHERE Accepted_YN = 0";
-                    }
-                    else if (rdbDepartedChildren.Checked)
-                    {
-                        query +=
-                            " WHERE Departure_Date IS NOT NULL";
-                    }
-
-
-                    // ------------------------------------------------
-                    // SORTING
-                    // ------------------------------------------------
-
-                    string sortColumn;
-
-                    switch (cmbSortBy.SelectedItem?.ToString())
-                    {
-                        case "Arrival Date":
-
-                            sortColumn = "Arrival_Date";
-
-                            break;
-
-                        case "Child ID":
-
-                            sortColumn = "Child_ID";
-
-                            break;
-
-                        case "Child Name":
-
-                        default:
-
-                            sortColumn = "Child_LName";
-
-                            break;
-                    }
-
-
-                    string sortDirection;
-
-                    if (rdoD.Checked)
-                    {
-                        sortDirection = "DESC";
-                    }
-                    else
-                    {
-                        sortDirection = "ASC";
-                    }
-
-
-                    // ------------------------------------------------
-                    // APPLY SORTING
-                    // ------------------------------------------------
-
-                    if (sortColumn == "Child_LName")
-                    {
-                        query +=
-                            " ORDER BY Child_LName " +
-                            sortDirection +
-                            ", Child_FName " +
-                            sortDirection;
-                    }
-                    else
-                    {
-                        query +=
-                            " ORDER BY " +
-                            sortColumn +
-                            " " +
-                            sortDirection;
-                    }
-
-
-                    // ------------------------------------------------
-                    // LOAD RESULTS
-                    // ------------------------------------------------
-
-                    using (SqlCommand command =
-                        new SqlCommand(query, conn))
-                    {
-                        using (SqlDataAdapter adapter =
-                            new SqlDataAdapter(command))
-                        {
-                            DataTable table =
-                                new DataTable();
-
-                            adapter.Fill(table);
-
-                            dgvChildReport.DataSource =
-                                table;
-
-
-                            // ------------------------------------------------
-                            // RECORD COUNT
-                            // ------------------------------------------------
-
-                            lblRecordCount.Text =
-                                "Records Found: " +
-                                table.Rows.Count;
-
-
-                            // ------------------------------------------------
-                            // STYLE GRID
-                            // ------------------------------------------------
-
-                            StyleChildReportGrid();
-
-
-                            // ------------------------------------------------
-                            // FRIENDLY COLUMN HEADERS
-                            // ------------------------------------------------
-
-                            if (dgvChildReport.Columns[
-                                "Child_ID"] != null)
-                            {
-                                dgvChildReport.Columns[
-                                    "Child_ID"].HeaderText =
-                                    "Child ID";
-                            }
-
-
-                            if (dgvChildReport.Columns[
-                                "Child_FName"] != null)
-                            {
-                                dgvChildReport.Columns[
-                                    "Child_FName"].HeaderText =
-                                    "First Name";
-                            }
-
-
-                            if (dgvChildReport.Columns[
-                                "Child_LName"] != null)
-                            {
-                                dgvChildReport.Columns[
-                                    "Child_LName"].HeaderText =
-                                    "Last Name";
-                            }
-
-
-                            if (dgvChildReport.Columns[
-                                "ID_Number"] != null)
-                            {
-                                dgvChildReport.Columns[
-                                    "ID_Number"].HeaderText =
-                                    "ID Number";
-                            }
-
-
-                            if (dgvChildReport.Columns[
-                                "Arrival_Date"] != null)
-                            {
-                                dgvChildReport.Columns[
-                                    "Arrival_Date"].HeaderText =
-                                    "Arrival Date";
-
-                                dgvChildReport.Columns[
-                                    "Arrival_Date"]
-                                    .DefaultCellStyle.Format =
-                                    "dd MMM yyyy";
-                            }
-
-
-                            if (dgvChildReport.Columns[
-                                "Accepted_YN"] != null)
-                            {
-                                dgvChildReport.Columns[
-                                    "Accepted_YN"].HeaderText =
-                                    "Accepted";
-                            }
-
-
-                            if (dgvChildReport.Columns[
-                                "Departure_Date"] != null)
-                            {
-                                dgvChildReport.Columns[
-                                    "Departure_Date"].HeaderText =
-                                    "Departure Date";
-
-                                dgvChildReport.Columns[
-                                    "Departure_Date"]
-                                    .DefaultCellStyle.Format =
-                                    "dd MMM yyyy";
-                            }
-                        }
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                MessageBox.Show(
-                    "A database error occurred while loading the children report:\n\n" +
-                    ex.Message,
-                    "Database Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Error loading children report:\n\n" +
-                    ex.Message,
-                    "Children Report Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-
-        // ============================================================
-        // LOAD ALL CHILDREN
-        // ============================================================
-
-        private void LoadAllChildren()
-        {
-            try
-            {
-                using (SqlConnection conn =
-                    new SqlConnection(connectionString))
-                {
-                    conn.Open();
-
-                    string query = @"
-                        SELECT
-                            Child_ID,
-                            Child_FName,
-                            Child_LName,
-                            ID_Number,
-                            Arrival_Date,
-                            Accepted_YN,
-                            Departure_Date
-                        FROM Child_tbl
-                        ORDER BY
-                            Child_LName ASC,
-                            Child_FName ASC";
-
-
-                    using (SqlDataAdapter adapter =
-                        new SqlDataAdapter(query, conn))
-                    {
-                        DataTable table =
-                            new DataTable();
-
-                        adapter.Fill(table);
-
-                        dgvChildReport.DataSource =
-                            table;
-
-                        StyleChildReportGrid();
-
-                        lblRecordCount.Text =
-                            "Records Found: " +
-                            table.Rows.Count;
-
-
-                        // ------------------------------------------------
-                        // FRIENDLY COLUMN HEADERS
-                        // ------------------------------------------------
-
-                        if (dgvChildReport.Columns[
-                            "Child_ID"] != null)
-                        {
-                            dgvChildReport.Columns[
-                                "Child_ID"].HeaderText =
-                                "Child ID";
-                        }
-
-
-                        if (dgvChildReport.Columns[
-                            "Child_FName"] != null)
-                        {
-                            dgvChildReport.Columns[
-                                "Child_FName"].HeaderText =
-                                "First Name";
-                        }
-
-
-                        if (dgvChildReport.Columns[
-                            "Child_LName"] != null)
-                        {
-                            dgvChildReport.Columns[
-                                "Child_LName"].HeaderText =
-                                "Last Name";
-                        }
-
-
-                        if (dgvChildReport.Columns[
-                            "ID_Number"] != null)
-                        {
-                            dgvChildReport.Columns[
-                                "ID_Number"].HeaderText =
-                                "ID Number";
-                        }
-
-
-                        if (dgvChildReport.Columns[
-                            "Arrival_Date"] != null)
-                        {
-                            dgvChildReport.Columns[
-                                "Arrival_Date"].HeaderText =
-                                "Arrival Date";
-
-                            dgvChildReport.Columns[
-                                "Arrival_Date"]
-                                .DefaultCellStyle.Format =
-                                "dd MMM yyyy";
-                        }
-
-
-                        if (dgvChildReport.Columns[
-                            "Accepted_YN"] != null)
-                        {
-                            dgvChildReport.Columns[
-                                "Accepted_YN"].HeaderText =
-                                "Accepted";
-                        }
-
-
-                        if (dgvChildReport.Columns[
-                            "Departure_Date"] != null)
-                        {
-                            dgvChildReport.Columns[
-                                "Departure_Date"].HeaderText =
-                                "Departure Date";
-
-                            dgvChildReport.Columns[
-                                "Departure_Date"]
-                                .DefaultCellStyle.Format =
-                                "dd MMM yyyy";
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Error loading children:\n\n" +
-                    ex.Message,
-                    "Children Report Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
 
         // ============================================================
         // FORM LOAD
@@ -468,72 +52,295 @@ namespace TawandaSystem
 
         private void ChildReport_Load(object sender, EventArgs e)
         {
+            // Display logged-in user
+            lblLoggedInUser.Text = "Welcome, " + loggedInUsername;
+            lblLoggedInRole.Text = "Role: " + loggedInRole;
+
+            // Set default date range
+            dateTimePickerFrom.Value = new DateTime(2000, 1, 1);
+
+            dateTimePickerTo.Value = DateTime.Now;
+
+            // Check database
+            CheckDatabaseConnection();
+
+            // Show initial report
+            GenerateChildReport();
+        }
+
+        // ============================================================
+        // DATABASE CONNECTION CHECK
+        // ============================================================
+
+        private void CheckDatabaseConnection()
+        {
             try
             {
-                // Default filter
-                rdbAllChildren.Checked = true;
+                using (SqlConnection connection =
+                       new SqlConnection(connectionString))
+                {
+                    connection.Open();
 
-                // Default sorting
-                rdoA.Checked = true;
+                    lblDTB.Text = "● Database Connected";
+                }
+            }
+            catch
+            {
+                lblDTB.Text = "● Database Disconnected";
+            }
+        }
 
-                // Sort options
-                cmbSortBy.Items.Clear();
+        // ============================================================
+        // GENERATE REPORT
+        // ============================================================
 
-                cmbSortBy.Items.Add("Child Name");
-                cmbSortBy.Items.Add("Arrival Date");
-                cmbSortBy.Items.Add("Child ID");
+        private void GenerateChildReport()
+        {
+            try
+            {
+                using (SqlConnection connection =
+                       new SqlConnection(connectionString))
+                {
+                    connection.Open();
 
-                cmbSortBy.SelectedIndex = 0;
+                    string query = @"
+                        SELECT
+                            Child_ID,
+                            Child_LName,
+                            Child_FName,
+                            ID_Number,
+                            Arrival_Date,
+                            Accepted_YN,
+                            Departure_Date
+                        FROM Child_tbl
+                        WHERE Arrival_Date BETWEEN @FromDate AND @ToDate
+                    ";
 
-                // Load all children
-                LoadAllChildren();
+                    // ------------------------------------------------
+                    // STATUS FILTER
+                    // ------------------------------------------------
+
+                    if (rdbAcceptedChildren.Checked)
+                    {
+                        query += " AND Accepted_YN = 1";
+                    }
+                    else if (rdbNotAcceptedChildren.Checked)
+                    {
+                        query += " AND Accepted_YN = 0";
+                    }
+                    else if (rdbDepartedChildren.Checked)
+                    {
+                        query += " AND Departure_Date IS NOT NULL";
+                    }
+
+                    query += " ORDER BY Arrival_Date ASC";
+
+                    using (SqlCommand command =
+                           new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue(
+                            "@FromDate",
+                            dateTimePickerFrom.Value.Date);
+
+                        command.Parameters.AddWithValue(
+                            "@ToDate",
+                            dateTimePickerTo.Value.Date);
+
+                        SqlDataAdapter adapter =
+                            new SqlDataAdapter(command);
+
+                        DataTable table = new DataTable();
+
+                        adapter.Fill(table);
+
+                        // Display records
+                        dgvChildReport.DataSource = table;
+
+                        // Format grid
+                        FormatDataGridView();
+
+                        // Create chart
+                        CreateChildrenChart(table);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Error loading child report:\n\n" +
-                    ex.Message,
+                    "Error loading children report:\n\n" + ex.Message,
                     "Report Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
 
+        // ============================================================
+        // FORMAT DATA GRID
+        // ============================================================
+
+        private void FormatDataGridView()
+        {
+            if (dgvChildReport.Columns.Count == 0)
+                return;
+
+            dgvChildReport.Columns["Child_ID"]
+                .HeaderText = "Child ID";
+
+            dgvChildReport.Columns["Child_LName"]
+                .HeaderText = "Last Name";
+
+            dgvChildReport.Columns["Child_FName"]
+                .HeaderText = "First Name";
+
+            dgvChildReport.Columns["ID_Number"]
+                .HeaderText = "ID Number";
+
+            dgvChildReport.Columns["Arrival_Date"]
+                .HeaderText = "Arrival Date";
+
+            dgvChildReport.Columns["Accepted_YN"]
+                .HeaderText = "Accepted";
+
+            dgvChildReport.Columns["Departure_Date"]
+                .HeaderText = "Departure Date";
+
+            // Date formatting
+            dgvChildReport.Columns["Arrival_Date"]
+                .DefaultCellStyle.Format = "dd/MM/yyyy";
+
+            dgvChildReport.Columns["Departure_Date"]
+                .DefaultCellStyle.Format = "dd/MM/yyyy";
+
+           
+        }
+
+        // ============================================================
+        // CREATE PIE CHART
+        // ============================================================
+
+        private void CreateChildrenChart(DataTable table)
+        {
+            chartChildrenStatus.Series.Clear();
+            chartChildrenStatus.Titles.Clear();
+            chartChildrenStatus.Legends.Clear();
+
+            chartChildrenStatus.Titles.Add(
+                "Children by Status");
+
+            Series series =
+                new Series("Children");
+
+            series.ChartType =
+                SeriesChartType.Pie;
+
+            series.IsValueShownAsLabel = true;
+
+            // --------------------------------------------------------
+            // COUNT STATUS
+            // --------------------------------------------------------
+
+            int accepted = 0;
+            int notAccepted = 0;
+            int departed = 0; int notDeparted = 0;
+
+            foreach (DataRow row in table.Rows)
+            {
+                bool isAccepted =
+                    Convert.ToBoolean(row["Accepted_YN"]);
+
+                bool hasDeparted =
+                    row["Departure_Date"] != DBNull.Value;
+
+                if (hasDeparted)
+                {
+                    departed++;
+                }
+                else if (isAccepted)
+                {
+                    accepted++;
+                }
+                else
+                {
+                    notAccepted++;
+                }
+            }
+
+            // --------------------------------------------------------
+            // ADD PIE SLICES
+            // --------------------------------------------------------
+
+            if (accepted > 0)
+            {
+                series.Points.AddXY(
+                    "Accepted",
+                    accepted);
+            }
+
+            if (notAccepted > 0)
+            {
+                series.Points.AddXY(
+                    "Not Accepted",
+                    notAccepted);
+            }
+
+            if (departed > 0)
+            {
+                series.Points.AddXY(
+                    "Departed",
+                    departed);
+            }
+
+            chartChildrenStatus.Series.Add(series);
+
+            chartChildrenStatus.Legends.Clear();
+
+            Legend legend = new Legend();
+            chartChildrenStatus.Legends.Add(legend);
+
+            series.Legend = legend.Name;
+
+            chartChildrenStatus.Dock = DockStyle.Fill;
+        }
+
+        // ============================================================
+        // GENERATE BUTTON
+        // ============================================================
+
+        private void btnGenerate_Click(
+            object sender,
+            EventArgs e)
+        {
+            if (dateTimePickerFrom.Value.Date >
+                dateTimePickerTo.Value.Date)
+            {
+                MessageBox.Show(
+                    "The 'From' date cannot be later than the 'To' date.",
+                    "Invalid Date Range",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            GenerateChildReport();
+        }
 
         // ============================================================
         // BACK BUTTON
         // ============================================================
 
-        private void btnBack_Click(object sender, EventArgs e)
+        private void btnBck_Click(
+            object sender,
+            EventArgs e)
         {
-            this.Hide();
-
-            AccessControl form =
+            AccessControl dashboard =
                 new AccessControl(
                     loggedInUsername,
                     loggedInRole);
 
-            form.Show();
-        }
+            dashboard.Show();
 
-
-        // ============================================================
-        // REPORT LABEL
-        // ============================================================
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-        }
-
-
-        // ============================================================
-        // DATAGRIDVIEW CELL CLICK
-        // ============================================================
-
-        private void dgvChildReport_CellContentClick(
-            object sender,
-            DataGridViewCellEventArgs e)
-        {
+            this.Close();
         }
     }
 }

@@ -81,11 +81,7 @@ VALUES
 	('8', 'Matlhabane', 'Lerato', '0310310650086', '2018-01-01', 'N', '2022-01-01'),
 	('9', 'Matlhabane', 'Lerato', '0310310650086', '2018-01-01', 'N', '2022-01-01');
 
---INSERT INTO SPONSOR TABLE
-	('1', 'Shoprite', 'Checkers', 'Shoprite@gmail.ac.za', '0118629531'),
-	('2', 'Shoprite', 'Checkers', 'Shoprite@gmail.ac.za', '0118629531'),
-	('3', 'Shoprite', 'Checkers', 'Shoprite@gmail.ac.za', '0118629531'),
-	('4', 'Shoprite', 'Checkers', 'Shoprite@gmail.ac.za', '0118629531');
+
 
 --INSERT INTO DONATION TABLE
 INSERT INTO DONATION (Donation_ID, Sponsor_ID, Date_Received, Amount, Quantity)

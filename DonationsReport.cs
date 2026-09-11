@@ -1,24 +1,28 @@
-﻿using System;
+﻿
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace TawandaSystem
 {
     public partial class DonationsReport : Form
     {
+        // ============================================================
+        // LOGGED-IN USER
+        // ============================================================
 
-        private string loggedInUsername;
-        private string loggedInRole;
+        private readonly string loggedInUsername;
+        private readonly string loggedInRole;
 
         // ============================================================
         // DATABASE CONNECTION
         // ============================================================
 
         private readonly string connectionString =
-            @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TAWANDA;Integrated Security=True;";
-
+            @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TAWANDA;Integrated Security=True";
 
         // ============================================================
         // CONSTRUCTOR
@@ -32,6 +36,17 @@ namespace TawandaSystem
             loggedInRole = role;
         }
 
+        // ============================================================
+        // DEFAULT CONSTRUCTOR
+        // ============================================================
+
+        public DonationsReport()
+        {
+            InitializeComponent();
+
+            loggedInUsername = "";
+            loggedInRole = "";
+        }
 
         // ============================================================
         // FORM LOAD
@@ -39,340 +54,94 @@ namespace TawandaSystem
 
         private void DonationsReport_Load(object sender, EventArgs e)
         {
-            try
-            {
-                // Populate Group By ComboBox
-                comboBoxGroupBy.Items.Clear();
+            lblLoggedInUser.Text = "Welcome, " + loggedInUsername;
+            lblLoggedInRole.Text = "Role: " + loggedInRole;
 
-                comboBoxGroupBy.Items.Add("Both");
-                comboBoxGroupBy.Items.Add("Year");
-                comboBoxGroupBy.Items.Add("Month");
+            // Show all existing donations by default
+            dateTimePickerFrom.Value = new DateTime(2000, 1, 1);
+            dateTimePickerTo.Value = DateTime.Today;
 
-                comboBoxGroupBy.SelectedIndex = 0;
+            CheckDatabaseConnection();
 
-                // Default sorting
-                rdoA.Checked = true;
-
-                // Default date range
-                dateTimePickerStartDate.Value =
-                    new DateTime(DateTime.Now.Year, 1, 1);
-
-                dateTimePickerEndDate.Value =
-                    DateTime.Today;
-
-                // Initial label
-                lblRecordCount.Text =
-                    "Records Found: 0";
-
-                // Load report
-                LoadDonationReport();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Error loading the donations report:\n\n" +
-                    ex.Message,
-                    "Report Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
+            GenerateDonationReport();
         }
 
-
         // ============================================================
-        // APPLY BUTTON
-        // ============================================================
-
-        private void btnApply_Click(object sender, EventArgs e)
-        {
-            LoadDonationReport();
-        }
-
-
-        // ============================================================
-        // LOAD DONATION REPORT
+        // DATABASE CONNECTION CHECK
         // ============================================================
 
-        private void LoadDonationReport()
+        private void CheckDatabaseConnection()
         {
             try
             {
-                // ----------------------------------------------------
-                // CHECK DATE RANGE
-                // ----------------------------------------------------
-
-                DateTime startDate =
-                    dateTimePickerStartDate.Value.Date;
-
-                DateTime endDate =
-                    dateTimePickerEndDate.Value.Date;
-
-                if (startDate > endDate)
+                using (SqlConnection connection =
+                       new SqlConnection(connectionString))
                 {
-                    MessageBox.Show(
-                        "The From date cannot be later than the To date.",
-                        "Invalid Date Range",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    connection.Open();
 
-                    return;
+                    lblDatabaseStatus.Text = "● Database Connected";
                 }
+            }
+            catch
+            {
+                lblDatabaseStatus.Text = "● Database Disconnected";
+            }
+        }
 
+        // ============================================================
+        // GENERATE DONATION REPORT
+        // ============================================================
 
-                // ----------------------------------------------------
-                // DATABASE CONNECTION
-                // ----------------------------------------------------
-
-                using (SqlConnection conn =
+        private void GenerateDonationReport()
+        {
+            try
+            {
+                using (SqlConnection connection =
                     new SqlConnection(connectionString))
                 {
-                    conn.Open();
-
-
-                    // ------------------------------------------------
-                    // BASE QUERY
-                    // ------------------------------------------------
+                    connection.Open();
 
                     string query = @"
-                        SELECT
-                            d.Donation_ID,
-
-                            ISNULL(
-                                s.Sponsor_FName + ' ' + s.Sponsor_LName,
-                                'Unknown Sponsor'
-                            ) AS Sponsor_Name,
-
-                            d.Date_Received,
-
-                            d.Amount,
-
-                            d.Quantity,
-
-                            ISNULL(
-                                dt.Description,
-                                'Not Specified'
-                            ) AS Donation_Type
-
-                        FROM Donation_tbl AS d
-
-                        LEFT JOIN SponsorTBL AS s
-                            ON d.Sponsor_ID = s.Sponsor_ID
-
-                        LEFT JOIN DonationDetails AS dd
-                            ON d.Donation_ID = dd.Donation_ID
-
-                        LEFT JOIN DonationType AS dt
-                            ON dd.DonationT_ID = dt.DonationT_ID
-
-                        WHERE d.Date_Received >= @StartDate
-
-                        AND d.Date_Received < DATEADD(day, 1, @EndDate)
-                    ";
-
-
-                    // ------------------------------------------------
-                    // GROUP BY
-                    // ------------------------------------------------
-
-                    string groupBy =
-                        comboBoxGroupBy.SelectedItem?.ToString();
-
-                    if (string.IsNullOrWhiteSpace(groupBy))
-                    {
-                        groupBy = "Both";
-                    }
-
-
-                    // ------------------------------------------------
-                    // SORT DIRECTION
-                    // ------------------------------------------------
-
-                    string sortDirection;
-
-                    if (rdoD.Checked)
-                    {
-                        sortDirection = "DESC";
-                    }
-                    else
-                    {
-                        sortDirection = "ASC";
-                    }
-
-
-                    // ------------------------------------------------
-                    // SORTING
-                    // ------------------------------------------------
-
-                    if (groupBy == "Year")
-                    {
-                        query += @"
-                            ORDER BY
-                                YEAR(d.Date_Received) " +
-                            sortDirection +
-                            @",
-                                d.Date_Received " +
-                            sortDirection;
-                    }
-                    else if (groupBy == "Month")
-                    {
-                        query += @"
-                            ORDER BY
-                                MONTH(d.Date_Received) " +
-                            sortDirection +
-                            @",
-                                d.Date_Received " +
-                            sortDirection;
-                    }
-                    else
-                    {
-                        // Both Year and Month
-
-                        query += @"
-                            ORDER BY
-                                YEAR(d.Date_Received) " +
-                            sortDirection +
-                            @",
-                                MONTH(d.Date_Received) " +
-                            sortDirection +
-                            @",
-                                d.Date_Received " +
-                            sortDirection;
-                    }
-
-
-                    // ------------------------------------------------
-                    // COMMAND
-                    // ------------------------------------------------
+                SELECT
+                    d.Donation_ID,
+                    d.Sponsor_ID,
+                    s.Sponsor_Name,
+                    d.Date_Received,
+                    d.Donation_Type,
+                    d.Amount,
+                    d.Quantity
+                FROM Donation_tbl d
+                LEFT JOIN SponsorTBL s
+                    ON d.Sponsor_ID = s.Sponsor_ID
+                WHERE d.Date_Received
+                    BETWEEN @FromDate AND @ToDate
+                ORDER BY d.Date_Received ASC";
 
                     using (SqlCommand command =
-                        new SqlCommand(query, conn))
+                        new SqlCommand(query, connection))
                     {
-                        command.Parameters.Add(
-                            "@StartDate",
-                            SqlDbType.Date).Value =
-                            startDate;
+                        command.Parameters.AddWithValue(
+                            "@FromDate",
+                            dateTimePickerFrom.Value.Date);
 
-                        command.Parameters.Add(
-                            "@EndDate",
-                            SqlDbType.Date).Value =
-                            endDate;
+                        command.Parameters.AddWithValue(
+                            "@ToDate",
+                            dateTimePickerTo.Value.Date);
 
+                        SqlDataAdapter adapter =
+                            new SqlDataAdapter(command);
 
-                        // ------------------------------------------------
-                        // LOAD DATA
-                        // ------------------------------------------------
+                        DataTable table = new DataTable();
 
-                        using (SqlDataAdapter adapter =
-                            new SqlDataAdapter(command))
-                        {
-                            DataTable table =
-                                new DataTable();
+                        adapter.Fill(table);
 
-                            adapter.Fill(table);
+                        dgvDonationReport.DataSource = table;
 
+                        FormatDataGridView();
 
-                            // ------------------------------------------------
-                            // DISPLAY
-                            // ------------------------------------------------
-
-                            dgvDonationReport.DataSource =
-                                table;
-
-
-                            // ------------------------------------------------
-                            // STYLE GRID
-                            // ------------------------------------------------
-
-                            StyleDonationReportGrid();
-
-
-                            // ------------------------------------------------
-                            // FRIENDLY HEADERS
-                            // ------------------------------------------------
-
-                            if (dgvDonationReport.Columns[
-                                "Donation_ID"] != null)
-                            {
-                                dgvDonationReport.Columns[
-                                    "Donation_ID"].HeaderText =
-                                    "Donation ID";
-                            }
-
-
-                            if (dgvDonationReport.Columns[
-                                "Sponsor_Name"] != null)
-                            {
-                                dgvDonationReport.Columns[
-                                    "Sponsor_Name"].HeaderText =
-                                    "Sponsor";
-                            }
-
-
-                            if (dgvDonationReport.Columns[
-                                "Date_Received"] != null)
-                            {
-                                dgvDonationReport.Columns[
-                                    "Date_Received"].HeaderText =
-                                    "Date Received";
-
-                                dgvDonationReport.Columns[
-                                    "Date_Received"]
-                                    .DefaultCellStyle.Format =
-                                    "dd MMM yyyy";
-                            }
-
-
-                            if (dgvDonationReport.Columns[
-                                "Amount"] != null)
-                            {
-                                dgvDonationReport.Columns[
-                                    "Amount"].HeaderText =
-                                    "Amount";
-
-                                dgvDonationReport.Columns[
-                                    "Amount"]
-                                    .DefaultCellStyle.Format =
-                                    "C2";
-                            }
-
-
-                            if (dgvDonationReport.Columns[
-                                "Quantity"] != null)
-                            {
-                                dgvDonationReport.Columns[
-                                    "Quantity"].HeaderText =
-                                    "Quantity";
-                            }
-
-
-                            if (dgvDonationReport.Columns[
-                                "Donation_Type"] != null)
-                            {
-                                dgvDonationReport.Columns[
-                                    "Donation_Type"].HeaderText =
-                                    "Donation Type";
-                            }
-
-
-                            // ------------------------------------------------
-                            // RECORD COUNT
-                            // ------------------------------------------------
-
-                            lblRecordCount.Text =
-                                "Records Found: " +
-                                table.Rows.Count;
-                        }
+                        CreateDonationChart(table);
                     }
                 }
-            }
-            catch (SqlException ex)
-            {
-                MessageBox.Show(
-                    "A database error occurred while loading the donations report:\n\n" +
-                    ex.Message,
-                    "Database Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -385,103 +154,186 @@ namespace TawandaSystem
             }
         }
 
-
         // ============================================================
-        // STYLE DATAGRIDVIEW
+        // FORMAT DATA GRID VIEW
         // ============================================================
 
-        private void StyleDonationReportGrid()
+        private void FormatDataGridView()
         {
-            dgvDonationReport.AutoSizeColumnsMode =
-                DataGridViewAutoSizeColumnsMode.Fill;
+            if (dgvDonationReport.Columns.Count == 0)
+                return;
 
-            dgvDonationReport.AllowUserToAddRows = false;
-
-            dgvDonationReport.AllowUserToDeleteRows = false;
-
-            dgvDonationReport.AllowUserToResizeRows = false;
-
-            dgvDonationReport.ReadOnly = true;
-
-            dgvDonationReport.MultiSelect = false;
-
-            dgvDonationReport.SelectionMode =
-                DataGridViewSelectionMode.FullRowSelect;
-
-            dgvDonationReport.RowHeadersVisible = false;
-
-            dgvDonationReport.ColumnHeadersDefaultCellStyle.Font =
-                new Font(
-                    dgvDonationReport.Font,
-                    FontStyle.Bold);
+            dgvDonationReport.EnableHeadersVisualStyles = false;
 
             dgvDonationReport.ColumnHeadersHeight = 35;
+            dgvDonationReport.RowTemplate.Height = 30;
 
-            dgvDonationReport.AlternatingRowsDefaultCellStyle.BackColor =
-                SystemColors.ControlLight;
+            dgvDonationReport.Columns["Donation_ID"]
+                .HeaderText = "Donation ID";
 
-            dgvDonationReport.GridColor =
-                SystemColors.ControlDark;
+            dgvDonationReport.Columns["Sponsor_ID"]
+                .HeaderText = "Sponsor ID";
+
+            dgvDonationReport.Columns["Sponsor_Name"]
+                .HeaderText = "Sponsor Name";
+
+            dgvDonationReport.Columns["Date_Received"]
+                .HeaderText = "Date Received";
+
+            dgvDonationReport.Columns["Donation_Type"]
+                .HeaderText = "Donation Type";
+
+            dgvDonationReport.Columns["Amount"]
+                .HeaderText = "Amount";
+
+            dgvDonationReport.Columns["Quantity"]
+                .HeaderText = "Quantity";
+
+            dgvDonationReport.Columns["Date_Received"]
+                .DefaultCellStyle.Format = "dd/MM/yyyy";
+
+            dgvDonationReport.Columns["Amount"]
+                .DefaultCellStyle.Format = "R #,##0.00";
+        }
+        // ============================================================
+        // CREATE DONATION CHART
+        // ============================================================
+
+        private void CreateDonationChart(DataTable table)
+        {
+            chartDonations.Series.Clear();
+            chartDonations.ChartAreas.Clear();
+            chartDonations.Titles.Clear();
+            chartDonations.Legends.Clear();
+
+            // Create chart area
+            ChartArea chartArea = new ChartArea("MainArea");
+            chartDonations.ChartAreas.Add(chartArea);
+
+            // Chart title
+            Title title = chartDonations.Titles.Add("Donations by Type");
+
+            title.Font = new Font(
+                "Segoe UI",
+                12,
+                FontStyle.Bold);
+
+            // Create series
+            Series series = new Series("Donations");
+
+            series.ChartType = SeriesChartType.Column;
+            series.IsValueShownAsLabel = true;
+
+            // Store totals for each donation type
+            System.Collections.Generic.Dictionary<string, decimal>
+                donationTotals =
+                new System.Collections.Generic.Dictionary<string, decimal>();
+
+            foreach (DataRow row in table.Rows)
+            {
+                string donationType = "Other";
+
+                if (row["Donation_Type"] != DBNull.Value &&
+                    !string.IsNullOrWhiteSpace(row["Donation_Type"].ToString()))
+                {
+                    donationType = row["Donation_Type"].ToString();
+                }
+
+                decimal amount = 0;
+
+                if (row["Amount"] != DBNull.Value)
+                {
+                    decimal.TryParse(
+                        row["Amount"].ToString(),
+                        out amount);
+                }
+
+                if (donationTotals.ContainsKey(donationType))
+                {
+                    donationTotals[donationType] += amount;
+                }
+                else
+                {
+                    donationTotals.Add(donationType, amount);
+                }
+            }
+
+            // Add donation types to chart
+            foreach (var item in donationTotals)
+            {
+                DataPoint point =
+                    series.Points.Add((double)item.Value);
+
+                point.AxisLabel = item.Key;
+
+                point.Label =
+                    "R " +
+                    item.Value.ToString("#,##0.00");
+
+                point.ToolTip =
+                    item.Key +
+                    ": R " +
+                    item.Value.ToString("#,##0.00");
+            }
+
+            chartDonations.Series.Add(series);
+
+            // Axis titles
+            chartArea.AxisX.Title = "Donation Type";
+            chartArea.AxisY.Title = "Donation Amount";
+
+            chartArea.AxisY.LabelStyle.Format = "R #,##0";
+
+            chartDonations.Dock = DockStyle.Fill;
         }
 
+        // ============================================================
+        // GENERATE BUTTON
+        // ============================================================
+
+        private void btnGenerate_Click(
+            object sender,
+            EventArgs e)
+        {
+            if (dateTimePickerFrom.Value.Date >
+                dateTimePickerTo.Value.Date)
+            {
+                MessageBox.Show(
+                    "The 'From' date cannot be later than the 'To' date.",
+                    "Invalid Date Range",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            GenerateDonationReport();
+        }
 
         // ============================================================
         // BACK BUTTON
         // ============================================================
 
-        private void btnBack_Click(object sender, EventArgs e)
-        {
-            this.Hide();
-
-            AccessControl access =
-                new AccessControl(loggedInUsername, loggedInRole);
-
-            access.Show();
-        }
-
-
-
-        // ============================================================
-        // EXIT
-        // ============================================================
-
-        private void toolStripExit_Click(object sender, EventArgs e)
-        {
-            DialogResult result =
-                MessageBox.Show(
-                    "Are you sure you want to exit?",
-                    "Confirm Exit",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                Application.Exit();
-            }
-        }
-
-
-        // ============================================================
-        // REPORT LABEL
-        // ============================================================
-
-        private void lblReport_Click(object sender, EventArgs e)
-        {
-        }
-
-
-        // ============================================================
-        // DATAGRIDVIEW CELL CLICK
-        // ============================================================
-
-        private void dgvDonationReport_CellContentClick(
+        private void btnBack_Click(
             object sender,
-            DataGridViewCellEventArgs e)
+            EventArgs e)
         {
+            AccessControl dashboard =
+                new AccessControl(
+                    loggedInUsername,
+                    loggedInRole);
+
+            dashboard.Show();
+
+            this.Close();
+        }
+
+        private void chartDonations_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
-
 
 
 

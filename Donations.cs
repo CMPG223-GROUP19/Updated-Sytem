@@ -1,35 +1,25 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Data.SqlTypes;
-using System.Drawing;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace TawandaSystem
 {
     public partial class Donations : Form
     {
-        // ============================================================
-        // DATABASE CONNECTION
-        // ============================================================
-
         private readonly string connectionString =
-            @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TAWANDA;Integrated Security=True;";
-
-
-        // ============================================================
-        // LOGGED-IN USER INFORMATION
-        // ============================================================
+            @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TAWANDA;Integrated Security=True";
 
         private string loggedInUsername;
         private string loggedInRole;
 
 
-        // ============================================================
-        // CONSTRUCTOR
-        // ============================================================
+        private int selectedSponsorID = 0;
+
+        private int selectedDonationID = 0;
+
+        
+
 
         public Donations(string username, string role)
         {
@@ -39,9 +29,6 @@ namespace TawandaSystem
             loggedInRole = role;
         }
 
-
-        // Optional constructor
-        // Keeps the form compatible with the Designer
         public Donations()
         {
             InitializeComponent();
@@ -50,221 +37,99 @@ namespace TawandaSystem
             loggedInRole = "";
         }
 
-
-        // ============================================================
-        // DONATION TYPE CLASS
-        // ============================================================
-
-        private class DonationTypeItem
+        private void Donations_Load(object sender, EventArgs e)
         {
-            public int ID { get; set; }
-            public string Description { get; set; }
+            lblLoggedInUser.Text = "User: " + loggedInUsername;
+            lblLoggedInRole.Text = "Role: " + loggedInRole;
 
-            public override string ToString()
-            {
-                return Description;
-            }
+            dateTimePickerDateReceived.Value = DateTime.Today;
+
+            LoadDonations();
+            CheckDatabaseConnection();
+
+            cmbDonationType.Items.Clear();
+
+            cmbDonationType.Items.Add("Money");
+            cmbDonationType.Items.Add("Food");
+            cmbDonationType.Items.Add("Clothing");
+            cmbDonationType.Items.Add("Other");
+
+            cmbDonationType.SelectedIndex = -1;
         }
 
-
-        // ============================================================
-        // FORM LOAD
-        // ============================================================
-
-        private void Donations_Load(object sender, EventArgs e)
+        private void CheckDatabaseConnection()
         {
             try
             {
-                LoadDonationTypes();
-                LoadSponsors();
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    lblDatabaseStatus.Text = "Database: Connected";
+                }
+            }
+            catch
+            {
+                lblDatabaseStatus.Text = "Database: Disconnected";
+            }
+        }
 
-                MessageBox.Show(
-                    "Database loaded successfully.\n\n" +
-                    "Donation types and sponsor records are ready.",
-                    "Database Ready",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+        private void LoadDonations()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                    SELECT
+        d.Donation_ID,
+        d.Sponsor_ID,
+        s.Sponsor_Name,
+        s.Sponsor_EmailAddr,
+        s.Sponsor_PhoneNo,
+        d.Date_Received,
+        d.Amount,
+        d.Quantity,
+        d.Donation_Type
+    FROM Donation_tbl d
+    INNER JOIN SponsorTBL s
+        ON d.Sponsor_ID = s.Sponsor_ID
+    ORDER BY d.Donation_ID DESC";
+
+                    using (SqlDataAdapter adapter =
+                        new SqlDataAdapter(query, conn))
+                    {
+                        DataTable table = new DataTable();
+                        adapter.Fill(table);
+
+                        dgvDonations.DataSource = table;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Error loading donation data:\n\n" + ex.Message,
+                    "Error loading donations:\n" + ex.Message,
                     "Database Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
 
-
-        // ============================================================
-        // LOAD DONATION TYPES
-        // ============================================================
-
-        private void LoadDonationTypes()
+        private void txtQuantity_TextChanged(object sender, EventArgs e)
         {
-            using (SqlConnection conn =
-                new SqlConnection(connectionString))
-            {
-                conn.Open();
-
-                string query = @"
-                    SELECT DonationT_ID, Description
-                    FROM dbo.DonationType
-                    ORDER BY DonationT_ID";
-
-                using (SqlCommand command =
-                    new SqlCommand(query, conn))
-                {
-                    using (SqlDataReader reader =
-                        command.ExecuteReader())
-                    {
-                        cmbDonationType.Items.Clear();
-
-                        while (reader.Read())
-                        {
-                            DonationTypeItem item =
-                                new DonationTypeItem
-                                {
-                                    ID = Convert.ToInt32(
-                                        reader["DonationT_ID"]),
-
-                                    Description =
-                                        reader["Description"]
-                                        .ToString()
-                                };
-
-                            cmbDonationType.Items.Add(item);
-                        }
-                    }
-                }
-            }
         }
 
-
-        // ============================================================
-        // LOAD SPONSORS
-        // ============================================================
-
-        private void LoadSponsors()
+        private void btnAcceptDonations_Click(object sender, EventArgs e)
         {
-            try
-            {
-                using (SqlConnection conn =
-                    new SqlConnection(connectionString))
-                {
-                    conn.Open();
+            // =========================================================
+            // VALIDATE SPONSOR NAME
+            // =========================================================
 
-                    string query = @"
-                        SELECT
-                            Sponsor_ID,
-                            Sponsor_LName,
-                            Sponsor_FName,
-                            Sponsor_EmailAddr,
-                            Sponsor_PhoneNo
-                        FROM dbo.SponsorTBL
-                        ORDER BY Sponsor_ID";
-
-                    using (SqlDataAdapter adapter =
-                        new SqlDataAdapter(query, conn))
-                    {
-                        DataTable table = new DataTable();
-
-                        adapter.Fill(table);
-
-                        dgvSponsor.DataSource = table;
-
-                        StyleSponsorGrid();
-                    }
-                }
-            }
-            catch (Exception ex)
+            if (string.IsNullOrWhiteSpace(txtSponsorName.Text))
             {
                 MessageBox.Show(
-                    "Error loading sponsors:\n\n" +
-                    ex.Message,
-                    "Sponsor Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-
-        // ============================================================
-        // EMAIL VALIDATION
-        // ============================================================
-
-        private bool IsValidEmail(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return false;
-
-            string pattern =
-                @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-
-            return Regex.IsMatch(email.Trim(), pattern);
-        }
-
-
-        // ============================================================
-        // PHONE VALIDATION
-        // ============================================================
-
-        private bool ValidatePhoneNumber(string phoneNumber)
-        {
-            if (string.IsNullOrWhiteSpace(phoneNumber))
-                return false;
-
-            phoneNumber = phoneNumber
-                .Replace(" ", "")
-                .Replace("-", "");
-
-            if (phoneNumber.Length != 10)
-                return false;
-
-            if (!phoneNumber.StartsWith("0"))
-                return false;
-
-            return phoneNumber.All(char.IsDigit);
-        }
-
-
-        // ============================================================
-        // ACCEPT DONATION
-        // ============================================================
-
-        private void btnAccept_Click(object sender, EventArgs e)
-        {
-            string lastName =
-                txtSponsorLName.Text.Trim();
-
-            string firstName =
-                txtSponsorName.Text.Trim();
-
-            string email =
-                txtEmailAddress.Text.Trim();
-
-            string phone =
-                txtPhoneNumber.Text.Trim();
-
-
-            if (string.IsNullOrWhiteSpace(lastName))
-            {
-                MessageBox.Show(
-                    "Please enter the sponsor's last name.",
-                    "Required Information",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                txtSponsorLName.Focus();
-                return;
-            }
-
-
-            if (string.IsNullOrWhiteSpace(firstName))
-            {
-                MessageBox.Show(
-                    "Please enter the sponsor's first name.",
-                    "Required Information",
+                    "Please enter the sponsor name.",
+                    "Missing Information",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
 
@@ -272,32 +137,9 @@ namespace TawandaSystem
                 return;
             }
 
-
-            if (!IsValidEmail(email))
-            {
-                MessageBox.Show(
-                    "Please enter a valid email address.",
-                    "Invalid Email",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                txtEmailAddress.Focus();
-                return;
-            }
-
-
-            if (!ValidatePhoneNumber(phone))
-            {
-                MessageBox.Show(
-                    "Please enter a valid 10-digit South African phone number starting with 0.",
-                    "Invalid Phone Number",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                txtPhoneNumber.Focus();
-                return;
-            }
-
+            // =========================================================
+            // VALIDATE DONATION TYPE
+            // =========================================================
 
             if (cmbDonationType.SelectedIndex == -1)
             {
@@ -311,15 +153,253 @@ namespace TawandaSystem
                 return;
             }
 
+            // =========================================================
+            // VALIDATE AMOUNT / QUANTITY
+            // =========================================================
 
-            DonationTypeItem selectedType =
-                cmbDonationType.SelectedItem as DonationTypeItem;
-
-            if (selectedType == null)
+            if (string.IsNullOrWhiteSpace(txtAmount.Text) &&
+                string.IsNullOrWhiteSpace(txtQuantity.Text))
             {
                 MessageBox.Show(
-                    "Please select a valid donation type.",
-                    "Invalid Donation Type",
+                    "Please enter either an amount or a quantity.",
+                    "Missing Donation Information",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            // =========================================================
+            // VALIDATE AMOUNT
+            // =========================================================
+
+            decimal amount = 0;
+
+            if (!string.IsNullOrWhiteSpace(txtAmount.Text))
+            {
+                if (!decimal.TryParse(txtAmount.Text, out amount) ||
+                    amount < 0)
+                {
+                    MessageBox.Show(
+                        "Please enter a valid donation amount.",
+                        "Invalid Amount",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+
+                    txtAmount.Focus();
+                    return;
+                }
+            }
+
+            // =========================================================
+            // SAVE DONATION
+            // =========================================================
+
+            try
+            {
+                using (SqlConnection conn =
+                       new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    using (SqlTransaction transaction =
+                           conn.BeginTransaction())
+                    {
+                        try
+                        {
+                            // =================================================
+                            // INSERT SPONSOR
+                            // =================================================
+
+                            string sponsorQuery = @"
+                        INSERT INTO SponsorTBL
+                            (Sponsor_Name,
+                             Sponsor_EmailAddr,
+                             Sponsor_PhoneNo)
+                        OUTPUT INSERTED.Sponsor_ID
+                        VALUES
+                            (@SponsorName,
+                             @Email,
+                             @Phone);";
+
+                            int sponsorID;
+
+                            using (SqlCommand sponsorCommand =
+                                   new SqlCommand(
+                                       sponsorQuery,
+                                       conn,
+                                       transaction))
+                            {
+                                sponsorCommand.Parameters.AddWithValue(
+                                    "@SponsorName",
+                                    txtSponsorName.Text.Trim());
+
+                                sponsorCommand.Parameters.AddWithValue(
+                                    "@Email",
+                                    string.IsNullOrWhiteSpace(txtEmail.Text)
+                                        ? (object)DBNull.Value
+                                        : txtEmail.Text.Trim());
+
+                                sponsorCommand.Parameters.AddWithValue(
+                                    "@Phone",
+                                    string.IsNullOrWhiteSpace(txtPhone.Text)
+                                        ? (object)DBNull.Value
+                                        : txtPhone.Text.Trim());
+
+                                sponsorID = Convert.ToInt32(
+                                    sponsorCommand.ExecuteScalar());
+                            }
+
+                            // =================================================
+                            // INSERT DONATION
+                            // =================================================
+
+                            string donationQuery = @"
+                        INSERT INTO Donation_tbl
+                            (Sponsor_ID,
+                             Date_Received,
+                             Amount,
+                             Quantity,
+                             Donation_Type)
+                        VALUES
+                            (@SponsorID,
+                             @DateReceived,
+                             @Amount,
+                             @Quantity,
+                             @DonationType);";
+
+                            using (SqlCommand donationCommand =
+                                   new SqlCommand(
+                                       donationQuery,
+                                       conn,
+                                       transaction))
+                            {
+                                donationCommand.Parameters.AddWithValue(
+                                    "@SponsorID",
+                                    sponsorID);
+
+                                donationCommand.Parameters.AddWithValue(
+                                    "@DateReceived",
+                                    dateTimePickerDateReceived.Value.Date);
+
+                                donationCommand.Parameters.AddWithValue(
+                                    "@Amount",
+                                    string.IsNullOrWhiteSpace(txtAmount.Text)
+                                        ? (object)DBNull.Value
+                                        : amount);
+
+                                donationCommand.Parameters.AddWithValue(
+                                    "@Quantity",
+                                    string.IsNullOrWhiteSpace(txtQuantity.Text)
+                                        ? (object)DBNull.Value
+                                        : txtQuantity.Text.Trim());
+
+                                donationCommand.Parameters.AddWithValue(
+                                    "@DonationType",
+                                    cmbDonationType.SelectedItem.ToString());
+
+                                donationCommand.ExecuteNonQuery();
+                            }
+
+                            // =================================================
+                            // COMMIT TRANSACTION
+                            // =================================================
+
+                            transaction.Commit();
+
+                            MessageBox.Show(
+                                "Donation successfully recorded!",
+                                "Success",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+
+                            // Clear form
+                            ClearDonationFields();
+
+                            // Refresh donation table
+                            LoadDonations();
+                        }
+                        catch
+                        {
+                            transaction.Rollback();
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Unable to save the donation.\n\n"
+                    + ex.Message,
+                    "Database Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        private void ClearDonationFields()
+        {
+            txtSponsorName.Clear();
+            txtEmail.Clear();
+            txtPhone.Clear();
+            txtAmount.Clear();
+            txtQuantity.Clear();
+
+            cmbDonationType.SelectedIndex = -1;
+
+            dateTimePickerDateReceived.Value = DateTime.Today;
+
+            selectedDonationID = 0;
+            selectedSponsorID = 0;
+
+            dgvDonations.ClearSelection();
+
+            txtSponsorName.Focus();
+        }
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            ClearDonationFields();
+        }
+
+        
+        
+
+
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            // Make sure a donation has been selected
+            if (selectedDonationID == 0)
+            {
+                MessageBox.Show(
+                    "Please select a donation record from the table first.",
+                    "No Record Selected",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            // Validate sponsor name
+            if (string.IsNullOrWhiteSpace(txtSponsorName.Text))
+            {
+                MessageBox.Show(
+                    "Please enter the sponsor name.",
+                    "Missing Information",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                txtSponsorName.Focus();
+                return;
+            }
+
+            // Validate donation type
+            if (cmbDonationType.SelectedIndex == -1)
+            {
+                MessageBox.Show(
+                    "Please select a donation type.",
+                    "Donation Type Required",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
 
@@ -327,29 +407,29 @@ namespace TawandaSystem
                 return;
             }
 
+            // Make sure amount OR quantity has been entered
+            if (string.IsNullOrWhiteSpace(txtAmount.Text) &&
+                string.IsNullOrWhiteSpace(txtQuantity.Text))
+            {
+                MessageBox.Show(
+                    "Please enter either an amount or a quantity.",
+                    "Missing Donation Information",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
 
+                return;
+            }
+
+            // Validate amount
             decimal amount = 0;
 
             if (!string.IsNullOrWhiteSpace(txtAmount.Text))
             {
-                if (!decimal.TryParse(
-                    txtAmount.Text.Trim(),
-                    out amount))
+                if (!decimal.TryParse(txtAmount.Text, out amount) ||
+                    amount < 0)
                 {
                     MessageBox.Show(
-                        "Please enter a valid amount.",
-                        "Invalid Amount",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-
-                    txtAmount.Focus();
-                    return;
-                }
-
-                if (amount < 0)
-                {
-                    MessageBox.Show(
-                        "Donation amount cannot be negative.",
+                        "Please enter a valid donation amount.",
                         "Invalid Amount",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -359,566 +439,133 @@ namespace TawandaSystem
                 }
             }
 
-
-            int quantity = 0;
-
-            if (!string.IsNullOrWhiteSpace(txtQTYA.Text))
-            {
-                if (!int.TryParse(
-                    txtQTYA.Text.Trim(),
-                    out quantity))
-                {
-                    MessageBox.Show(
-                        "Please enter a whole number for quantity.",
-                        "Invalid Quantity",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-
-                    txtQTYA.Focus();
-                    return;
-                }
-
-                if (quantity < 0)
-                {
-                    MessageBox.Show(
-                        "Quantity cannot be negative.",
-                        "Invalid Quantity",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-
-                    txtQTYA.Focus();
-                    return;
-                }
-            }
-
-
-            if (amount == 0 && quantity == 0)
-            {
-                MessageBox.Show(
-                    "Please enter either an amount or a quantity.",
-                    "Donation Information Required",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                txtAmount.Focus();
-                return;
-            }
-
-
-            DateTime donationDate =
-                dateTimePickerDreceived.Value.Date;
-
-
-            // ========================================================
-            // DATABASE TRANSACTION
-            // ========================================================
-
-            using (SqlConnection conn =
-                new SqlConnection(connectionString))
-            {
-                conn.Open();
-
-                SqlTransaction transaction =
-                    conn.BeginTransaction();
-
-                try
-                {
-                    // ------------------------------------------------
-                    // INSERT SPONSOR
-                    // ------------------------------------------------
-
-                    string sponsorQuery = @"
-                        INSERT INTO SponsorTBL
-                        (
-                            Sponsor_LName,
-                            Sponsor_FName,
-                            Sponsor_EmailAddr,
-                            Sponsor_PhoneNo
-                        )
-                        VALUES
-                        (
-                            @LastName,
-                            @FirstName,
-                            @Email,
-                            @Phone
-                        );
-
-                        SELECT CAST(SCOPE_IDENTITY() AS int);";
-
-
-                    int sponsorID;
-
-                    using (SqlCommand command =
-                        new SqlCommand(
-                            sponsorQuery,
-                            conn,
-                            transaction))
-                    {
-                        command.Parameters.Add(
-                            "@LastName",
-                            SqlDbType.VarChar,
-                            255).Value = lastName;
-
-                        command.Parameters.Add(
-                            "@FirstName",
-                            SqlDbType.VarChar,
-                            255).Value = firstName;
-
-                        command.Parameters.Add(
-                            "@Email",
-                            SqlDbType.VarChar,
-                            255).Value = email;
-
-                        command.Parameters.Add(
-                            "@Phone",
-                            SqlDbType.Char,
-                            10).Value = phone;
-
-                        sponsorID =
-                            Convert.ToInt32(
-                                command.ExecuteScalar());
-                    }
-
-
-                    // ------------------------------------------------
-                    // INSERT DONATION
-                    // ------------------------------------------------
-
-                    string donationQuery = @"
-    INSERT INTO Donation_tbl 
-    ( 
-        Sponsor_ID, 
-        Date_Received, 
-        Amount, 
-        Quantity 
-    ) 
-    VALUES 
-    ( 
-        @Sponsor_ID, 
-        @Date_Received, 
-        @Amount, 
-        @Quantity 
-    );
-
-    SELECT CAST(SCOPE_IDENTITY() AS int);";
-
-
-                    int donationID;
-
-                    using (SqlCommand command =
-                        new SqlCommand(
-                            donationQuery,
-                            conn,
-                            transaction))
-                    {
-                        command.Parameters.Add(
-                            "@Sponsor_ID",
-                            SqlDbType.Int).Value =
-                            sponsorID;
-
-                        command.Parameters.Add(
-                             "@Date_Received",
-                            SqlDbType.Date).Value =
-                            donationDate;
-
-                        command.Parameters.Add(
-                            "@Amount",
-                            SqlDbType.Money).Value =
-                            amount;
-
-                        command.Parameters.Add(
-                            "@Quantity",
-                            SqlDbType.Int).Value =
-                            quantity;
-
-                        donationID =
-                            Convert.ToInt32(
-                                command.ExecuteScalar());
-                    }
-
-
-                    // ------------------------------------------------
-                    // INSERT DONATION DETAILS
-                    // ------------------------------------------------
-
-                    string detailsQuery = @"
-                        INSERT INTO DonationDetails
-                        (
-                            Donation_ID,
-                            DonationT_ID
-                        )
-                        VALUES
-                        (
-                            @Donation_ID,
-                            @DonationT_ID
-                        );";
-
-
-                    using (SqlCommand command =
-                        new SqlCommand(
-                            detailsQuery,
-                            conn,
-                            transaction))
-                    {
-                        command.Parameters.Add(
-                            "@Donation_ID",
-                            SqlDbType.Int).Value =
-                            donationID;
-
-                        command.Parameters.Add(
-                            "@DonationT_ID",
-                            SqlDbType.Int).Value =
-                            selectedType.ID;
-
-                        command.ExecuteNonQuery();
-                    }
-
-
-                    transaction.Commit();
-
-
-                    MessageBox.Show(
-                        "Donation successfully recorded!\n\n" +
-                        "Sponsor ID: " + sponsorID + "\n" +
-                        "Donation ID: " + donationID + "\n" +
-                        "Donation Type: " +
-                        selectedType.Description,
-                        "Donation Recorded",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-
-
-                    ClearAddFields();
-
-                    LoadSponsors();
-                }
-                catch (Exception ex)
-                {
-                    try
-                    {
-                        transaction.Rollback();
-                    }
-                    catch
-                    {
-                    }
-
-                    MessageBox.Show(
-                        "The donation could not be saved.\n\n" +
-                        ex.Message,
-                        "Database Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-                }
-            }
-        }
-
-
-        // ============================================================
-        // CLEAR ADD DONATION
-        // ============================================================
-
-        private void ClearAddFields()
-        {
-            txtSponsorLName.Clear();
-            txtSponsorName.Clear();
-            txtEmailAddress.Clear();
-            txtPhoneNumber.Clear();
-
-            txtAmount.Clear();
-            txtQTYA.Clear();
-
-            cmbDonationType.SelectedIndex = -1;
-
-            dateTimePickerDreceived.Value =
-                DateTime.Today;
-        }
-
-
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            ClearAddFields();
-        }
-
-
-        // ============================================================
-        // DISPLAY DONATIONS
-        // ============================================================
-
-        private void btnEnter_Click(object sender, EventArgs e)
-        {
             try
             {
                 using (SqlConnection conn =
-                    new SqlConnection(connectionString))
+                       new SqlConnection(connectionString))
                 {
                     conn.Open();
 
-                    string query = @"
-    SELECT 
-        Donation_ID, 
-        Sponsor_ID, 
-        Date_Received, 
-        Amount, 
-        Quantity 
-    FROM Donation_tbl";
-
-
-                    if (rbtnLessThan.Checked)
+                    using (SqlTransaction transaction =
+                           conn.BeginTransaction())
                     {
-                        query +=
-                            " WHERE Date_Received < @StartDate";
-                    }
-                    else if (rbtnPresent.Checked)
-                    {
-                        query +=
-                            " WHERE Date_Received >= @StartDate";
-                    }
-
-
-                    query +=
-                        " ORDER BY Date_Received DESC";
-
-
-                    using (SqlCommand command =
-                        new SqlCommand(query, conn))
-                    {
-                        if (rbtnLessThan.Checked ||
-                            rbtnPresent.Checked)
+                        try
                         {
-                            command.Parameters.Add(
-                                "@StartDate",
-                                SqlDbType.Date).Value =
-                                new DateTime(2018, 1, 1);
-                        }
+                            // =====================================================
+                            // UPDATE SPONSOR INFORMATION
+                            // =====================================================
 
-
-                        using (SqlDataAdapter adapter =
-                            new SqlDataAdapter(command))
-                        {
-                            DataTable table =
-                                new DataTable();
-
-                            adapter.Fill(table);
-
-                            dgvReceived.DataSource =
-                                table;
-
-                            StyleReceivedGrid();
-
-
-                            if (dgvReceived.Columns["Amount"] != null)
-                            {
-                                dgvReceived.Columns["Amount"]
-                                    .DefaultCellStyle.Format =
-                                    "C2";
-                            }
-
-
-                            if (dgvReceived.Columns["Date_Received"] != null)
-                            {
-                                dgvReceived.Columns["Date_Received"]
-                                    .DefaultCellStyle.Format =
-                                    "dd MMM yyyy";
-                            }
-
-
-                            lblRecordCount.Text =
-                                "Records Found: " +
-                                table.Rows.Count;
-
-
-                            decimal totalAmount = 0;
-                            int totalQuantity = 0;
-
-
-                            foreach (DataRow row in table.Rows)
-                            {
-                                if (row["Amount"] != DBNull.Value)
-                                {
-                                    totalAmount +=
-                                        Convert.ToDecimal(
-                                            row["Amount"]);
-                                }
-
-
-                                if (row["Quantity"] != DBNull.Value)
-                                {
-                                    totalQuantity +=
-                                        Convert.ToInt32(
-                                            row["Quantity"]);
-                                }
-                            }
-
-
-                            lblTotalAmount.Text =
-                                "Total Amount: " +
-                                totalAmount.ToString("C2");
-
-
-                            lblTotalQuantity.Text =
-                                "Total Quantity: " +
-                                totalQuantity;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Error loading donation records:\n\n" +
-                    ex.Message,
-                    "Display Records Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-
-        // ============================================================
-        // UPDATE SPONSOR
-        // ============================================================
-
-        private void btnUpdate_Click(object sender, EventArgs e)
-        {
-            if (!int.TryParse(
-                txtSponsorID.Text.Trim(),
-                out int sponsorID))
-            {
-                MessageBox.Show(
-                    "Please select a valid sponsor first.",
-                    "Invalid Sponsor ID",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                txtSponsorID.Focus();
-                return;
-            }
-
-
-            string lastName =
-                txtLNameUp.Text.Trim();
-
-            string firstName =
-                txtNameUp.Text.Trim();
-
-            string email =
-                txtEmailAddressUp.Text.Trim();
-
-            string phone =
-                txtPhoneNum.Text.Trim();
-
-
-            if (string.IsNullOrWhiteSpace(lastName) ||
-                string.IsNullOrWhiteSpace(firstName))
-            {
-                MessageBox.Show(
-                    "Please enter the sponsor's first name and last name.",
-                    "Missing Information",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-
-            if (!IsValidEmail(email))
-            {
-                MessageBox.Show(
-                    "Please enter a valid email address.",
-                    "Invalid Email",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                txtEmailAddressUp.Focus();
-                return;
-            }
-
-
-            if (!ValidatePhoneNumber(phone))
-            {
-                MessageBox.Show(
-                    "Please enter a valid 10-digit South African phone number starting with 0.",
-                    "Invalid Phone Number",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                txtPhoneNum.Focus();
-                return;
-            }
-
-
-            try
-            {
-                using (SqlConnection conn =
-                    new SqlConnection(connectionString))
-                {
-                    conn.Open();
-
-                    string query = @"
+                            string sponsorQuery = @"
                         UPDATE SponsorTBL
                         SET
-                            Sponsor_LName = @LastName,
-                            Sponsor_FName = @FirstName,
+                            Sponsor_Name = @SponsorName,
                             Sponsor_EmailAddr = @Email,
                             Sponsor_PhoneNo = @Phone
-                        WHERE Sponsor_ID = @Sponsor_ID";
+                        WHERE Sponsor_ID =
+                            (SELECT Sponsor_ID
+                             FROM Donation_tbl
+                             WHERE Donation_ID = @DonationID)";
 
+                            using (SqlCommand sponsorCommand =
+                                   new SqlCommand(
+                                       sponsorQuery,
+                                       conn,
+                                       transaction))
+                            {
+                                sponsorCommand.Parameters.AddWithValue(
+                                    "@SponsorName",
+                                    txtSponsorName.Text.Trim());
 
-                    using (SqlCommand command =
-                        new SqlCommand(query, conn))
-                    {
-                        command.Parameters.Add(
-                            "@LastName",
-                            SqlDbType.VarChar,
-                            255).Value =
-                            lastName;
+                                sponsorCommand.Parameters.AddWithValue(
+                                    "@Email",
+                                    string.IsNullOrWhiteSpace(txtEmail.Text)
+                                        ? (object)DBNull.Value
+                                        : txtEmail.Text.Trim());
 
-                        command.Parameters.Add(
-                            "@FirstName",
-                            SqlDbType.VarChar,
-                            255).Value =
-                            firstName;
+                                sponsorCommand.Parameters.AddWithValue(
+                                    "@Phone",
+                                    string.IsNullOrWhiteSpace(txtPhone.Text)
+                                        ? (object)DBNull.Value
+                                        : txtPhone.Text.Trim());
 
-                        command.Parameters.Add(
-                            "@Email",
-                            SqlDbType.VarChar,
-                            255).Value =
-                            email;
+                                sponsorCommand.Parameters.AddWithValue(
+                                    "@DonationID",
+                                    selectedDonationID);
 
-                        command.Parameters.Add(
-                            "@Phone",
-                            SqlDbType.Char,
-                            10).Value =
-                            phone;
+                                sponsorCommand.ExecuteNonQuery();
+                            }
 
-                        command.Parameters.Add(
-                            "@Sponsor_ID",
-                            SqlDbType.Int).Value =
-                            sponsorID;
+                            // =====================================================
+                            // UPDATE DONATION INFORMATION
+                            // =====================================================
 
+                            string donationQuery = @"
+                        UPDATE Donation_tbl
+                        SET
+                            Date_Received = @DateReceived,
+                            Amount = @Amount,
+                            Quantity = @Quantity,
+                            Donation_Type = @DonationType
+                        WHERE Donation_ID = @DonationID";
 
-                        int rowsAffected =
-                            command.ExecuteNonQuery();
+                            using (SqlCommand donationCommand =
+                                   new SqlCommand(
+                                       donationQuery,
+                                       conn,
+                                       transaction))
+                            {
+                                donationCommand.Parameters.AddWithValue(
+                                    "@DateReceived",
+                                    dateTimePickerDateReceived.Value.Date);
 
+                                donationCommand.Parameters.AddWithValue(
+                                    "@Amount",
+                                    string.IsNullOrWhiteSpace(txtAmount.Text)
+                                        ? (object)DBNull.Value
+                                        : amount);
 
-                        if (rowsAffected > 0)
-                        {
+                                donationCommand.Parameters.AddWithValue(
+                                    "@Quantity",
+                                    string.IsNullOrWhiteSpace(txtQuantity.Text)
+                                        ? (object)DBNull.Value
+                                        : txtQuantity.Text.Trim());
+
+                                donationCommand.Parameters.AddWithValue(
+                                    "@DonationType",
+                                    cmbDonationType.SelectedItem.ToString());
+
+                                donationCommand.Parameters.AddWithValue(
+                                    "@DonationID",
+                                    selectedDonationID);
+
+                                donationCommand.ExecuteNonQuery();
+                            }
+
+                            // =====================================================
+                            // COMMIT
+                            // =====================================================
+
+                            transaction.Commit();
+
                             MessageBox.Show(
-                                "Sponsor information updated successfully.",
+                                "Donation successfully updated!",
                                 "Update Successful",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Information);
 
-                            LoadSponsors();
+                            // Clear form
+                            ClearDonationFields();
+
+                            selectedDonationID = 0;
+                            selectedSponsorID = 0;
+
+                            // Refresh table
+                            LoadDonations();
                         }
-                        else
+                        catch
                         {
-                            MessageBox.Show(
-                                "No sponsor was found with Sponsor ID " +
-                                sponsorID + ".",
-                                "Update Failed",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }
@@ -926,7 +573,7 @@ namespace TawandaSystem
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Error updating sponsor:\n\n" +
+                    "Unable to update the donation.\n\n" +
                     ex.Message,
                     "Database Error",
                     MessageBoxButtons.OK,
@@ -934,342 +581,122 @@ namespace TawandaSystem
             }
         }
 
-
-        // ============================================================
-        // UPDATE - CLEAR
-        // ============================================================
-
-        private void btnClearUp_Click(object sender, EventArgs e)
+        private void lblSponsorName_Click(object sender, EventArgs e)
         {
-            txtSponsorID.Clear();
-            txtLNameUp.Clear();
-            txtNameUp.Clear();
-            txtEmailAddressUp.Clear();
-            txtPhoneNum.Clear();
 
-            dgvSponsor.ClearSelection();
         }
 
-
-        // ============================================================
-        // RELOAD SPONSORS
-        // ============================================================
-
-        private void btnReloadD_Click(object sender, EventArgs e)
+        private void dgvDonations_CellClick_1(object sender, DataGridViewCellEventArgs e)
         {
-            LoadSponsors();
-
-            txtSponsorID.Clear();
-            txtLNameUp.Clear();
-            txtNameUp.Clear();
-            txtEmailAddressUp.Clear();
-            txtPhoneNum.Clear();
-
-            dgvSponsor.ClearSelection();
-
-            MessageBox.Show(
-                "Sponsor records have been refreshed successfully.",
-                "Reload Successful",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-
-
-        // ============================================================
-        // SPONSOR GRID CLICK
-        // ============================================================
-
-        private void dgvSponsor_CellClick(
-            object sender,
-            DataGridViewCellEventArgs e)
-        {
+            // Ignore the header row
             if (e.RowIndex < 0)
                 return;
 
+            try
+            {
+                DataGridViewRow row = dgvDonations.Rows[e.RowIndex];
 
-            DataGridViewRow row =
-                dgvSponsor.Rows[e.RowIndex];
+                selectedDonationID =
+    Convert.ToInt32(row.Cells["Donation_ID"].Value);
 
+                // =====================================================
+                // SPONSOR INFORMATION
+                // =====================================================
 
-            txtSponsorID.Text =
-                row.Cells["Sponsor_ID"]
-                .Value?.ToString() ?? "";
+                txtSponsorName.Text =
+                    row.Cells["Sponsor_Name"].Value?.ToString() ?? "";
 
+                txtEmail.Text =
+                    row.Cells["Sponsor_EmailAddr"].Value?.ToString() ?? "";
 
-            txtLNameUp.Text =
-                row.Cells["Sponsor_LName"]
-                .Value?.ToString() ?? "";
+                txtPhone.Text =
+                    row.Cells["Sponsor_PhoneNo"].Value?.ToString() ?? "";
 
+                // =====================================================
+                // DATE RECEIVED
+                // =====================================================
 
-            txtNameUp.Text =
-                row.Cells["Sponsor_FName"]
-                .Value?.ToString() ?? "";
+                if (row.Cells["Date_Received"].Value != null &&
+                    row.Cells["Date_Received"].Value != DBNull.Value)
+                {
+                    dateTimePickerDateReceived.Value =
+                        Convert.ToDateTime(
+                            row.Cells["Date_Received"].Value);
+                }
 
+                // =====================================================
+                // DONATION TYPE
+                // =====================================================
 
-            txtEmailAddressUp.Text =
-                row.Cells["Sponsor_EmailAddr"]
-                .Value?.ToString() ?? "";
+                if (row.Cells["Donation_Type"].Value != null &&
+                    row.Cells["Donation_Type"].Value != DBNull.Value)
+                {
+                    string donationType =
+                        row.Cells["Donation_Type"].Value.ToString();
 
+                    cmbDonationType.SelectedItem = donationType;
+                }
+                else
+                {
+                    cmbDonationType.SelectedIndex = -1;
+                }
 
-            txtPhoneNum.Text =
-                row.Cells["Sponsor_PhoneNo"]
-                .Value?.ToString() ?? "";
+                // =====================================================
+                // AMOUNT
+                // =====================================================
+
+                if (row.Cells["Amount"].Value != null &&
+                    row.Cells["Amount"].Value != DBNull.Value)
+                {
+                    txtAmount.Text =
+                        row.Cells["Amount"].Value.ToString();
+                }
+                else
+                {
+                    txtAmount.Clear();
+                }
+
+                // =====================================================
+                // QUANTITY
+                // =====================================================
+
+                if (row.Cells["Quantity"].Value != null &&
+                    row.Cells["Quantity"].Value != DBNull.Value)
+                {
+                    txtQuantity.Text =
+                        row.Cells["Quantity"].Value.ToString();
+                }
+                else
+                {
+                    txtQuantity.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Unable to load the selected donation.\n\n"
+                    + ex.Message,
+                    "Selection Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
-
-        // ============================================================
-        // SPONSOR GRID STYLE
-        // ============================================================
-
-        private void StyleSponsorGrid()
+        private void panel2_Paint(object sender, PaintEventArgs e)
         {
-            dgvSponsor.AutoSizeColumnsMode =
-                DataGridViewAutoSizeColumnsMode.Fill;
 
-            dgvSponsor.AutoSizeRowsMode =
-                DataGridViewAutoSizeRowsMode.None;
-
-            dgvSponsor.AllowUserToAddRows = false;
-            dgvSponsor.AllowUserToDeleteRows = false;
-            dgvSponsor.AllowUserToResizeRows = false;
-
-            dgvSponsor.ReadOnly = true;
-
-            dgvSponsor.MultiSelect = false;
-
-            dgvSponsor.SelectionMode =
-                DataGridViewSelectionMode.FullRowSelect;
-
-            dgvSponsor.RowHeadersVisible = false;
-
-            dgvSponsor.ColumnHeadersDefaultCellStyle.Font =
-                new Font(
-                    dgvSponsor.Font,
-                    FontStyle.Bold);
-
-            dgvSponsor.ColumnHeadersHeight = 35;
-
-            dgvSponsor.DefaultCellStyle.SelectionBackColor =
-                SystemColors.Highlight;
-
-            dgvSponsor.DefaultCellStyle.SelectionForeColor =
-                SystemColors.HighlightText;
-
-            dgvSponsor.AlternatingRowsDefaultCellStyle.BackColor =
-                SystemColors.ControlLight;
-
-            dgvSponsor.GridColor =
-                SystemColors.ControlDark;
         }
-
-
-        // ============================================================
-        // RECEIVED DONATIONS GRID STYLE
-        // ============================================================
-
-        private void StyleReceivedGrid()
-        {
-            dgvReceived.AutoSizeColumnsMode =
-                DataGridViewAutoSizeColumnsMode.Fill;
-
-            dgvReceived.AutoSizeRowsMode =
-                DataGridViewAutoSizeRowsMode.None;
-
-            dgvReceived.AllowUserToAddRows = false;
-            dgvReceived.AllowUserToDeleteRows = false;
-            dgvReceived.AllowUserToResizeRows = false;
-
-            dgvReceived.ReadOnly = true;
-
-            dgvReceived.MultiSelect = false;
-
-            dgvReceived.SelectionMode =
-                DataGridViewSelectionMode.FullRowSelect;
-
-            dgvReceived.RowHeadersVisible = false;
-
-            dgvReceived.ColumnHeadersDefaultCellStyle.Font =
-                new Font(
-                    dgvReceived.Font,
-                    FontStyle.Bold);
-
-            dgvReceived.ColumnHeadersHeight = 35;
-
-            dgvReceived.DefaultCellStyle.SelectionBackColor =
-                SystemColors.Highlight;
-
-            dgvReceived.DefaultCellStyle.SelectionForeColor =
-                SystemColors.HighlightText;
-
-            dgvReceived.AlternatingRowsDefaultCellStyle.BackColor =
-                SystemColors.ControlLight;
-
-            dgvReceived.GridColor =
-                SystemColors.ControlDark;
-        }
-
-
-        // ============================================================
-        // BACK BUTTONS
-        // ============================================================
 
         private void btnBack_Click(object sender, EventArgs e)
         {
-            ReturnToAccessControl();
-        }
-
-
-        private void btnBackUp_Click(object sender, EventArgs e)
-        {
-            ReturnToAccessControl();
-        }
-
-
-        private void btnBackDel_Click(object sender, EventArgs e)
-        {
-            ReturnToAccessControl();
-        }
-
-
-        private void btnBackDis_Click(object sender, EventArgs e)
-        {
-            ReturnToAccessControl();
-        }
-
-
-        // ============================================================
-        // RETURN TO ACCESS CONTROL
-        // ============================================================
-
-        private void ReturnToAccessControl()
-        {
-            AccessControl access =
+            AccessControl dashboard =
                 new AccessControl(
                     loggedInUsername,
                     loggedInRole);
 
-            access.Show();
+            dashboard.Show();
 
             this.Close();
         }
-
-
-        // ============================================================
-        // EXIT
-        // ============================================================
-
-        private void exitToolStripMenuItem_Click(
-            object sender,
-            EventArgs e)
-        {
-            DialogResult result =
-                MessageBox.Show(
-                    "Are you sure you want to exit?",
-                    "Confirm Exit",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                Application.Exit();
-            }
-        }
-
-
-        // ============================================================
-        // DESIGNER EVENT HANDLERS
-        // ============================================================
-
-        private void btnDisplayAll_Click(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void btnClearDel_Click(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void tpgDonationsReceived_SelectedIndexChanged(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void tpgAdd_Click(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void txtDescription_TextChanged(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void comboBoxDonationID_SelectedIndexChanged(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void tpgDelete_Click(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void lstOutput_SelectedIndexChanged(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void tpgUpdate_Click(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void txtSponsorID_TextChanged(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void cmbDonationType_SelectedIndexChanged(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void cmbDonationType_SelectedIndexChanged_1(
-            object sender,
-            EventArgs e)
-        {
-        }
-
-
-        private void dgvSponsor_CellContentClick(
-            object sender,
-            DataGridViewCellEventArgs e)
-        {
-        }
     }
 }
-
-
